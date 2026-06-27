@@ -1,12 +1,20 @@
 import express from "express";
-import { postRoom, getRooms } from "../controllers/room.controller.js"; // Added getRooms here
+
+import {
+  postRoom,
+  getRooms,
+  searchRooms,
+} from "../controllers/room.controller.js";
 
 const router = express.Router();
 
-// POST route to create a room
+// Create Room
 router.post("/", postRoom);
 
-// GET route to show all listed rooms
+// Search Room
+router.get("/search", searchRooms);
+
+// Get All Rooms
 router.get("/", getRooms);
 
 export default router;
