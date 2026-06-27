@@ -1,10 +1,11 @@
 import Room from "../models/room.model.js";
 
-// CREATE ROOM
+// =======================
+// Create Room
+// =======================
 export const postRoom = async (req, res) => {
   const room = req.body;
 
-  // Validate required fields
   if (!room.title || !room.location) {
     return res.status(400).json({
       success: false,
@@ -24,7 +25,6 @@ export const postRoom = async (req, res) => {
   } catch (error) {
     console.log("Error creating room:", error.message);
 
-    // Duplicate key error
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
@@ -39,13 +39,16 @@ export const postRoom = async (req, res) => {
   }
 };
 
-// GET ALL ROOMS
+// =======================
+// Get All Rooms
+// =======================
 export const getRooms = async (req, res) => {
   try {
-    const rooms = await Room.find({});
+    const rooms = await Room.find({}).sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
+      count: rooms.length,
       data: rooms,
     });
   } catch (error) {
@@ -58,60 +61,35 @@ export const getRooms = async (req, res) => {
   }
 };
 
-// EDIT ROOM
-export const editRoom = async (req, res) => {
-  const { id } = req.params;
-  const updatedRoom = req.body;
-
+// =======================
+// Search Rooms
+// =======================
+export const searchRooms = async (req, res) => {
   try {
-    const room = await Room.findByIdAndUpdate(id, updatedRoom, {
-      new: true,
-      runValidators: true,
-    });
+    const { keyword } = req.query;
 
-    if (!room) {
-      return res.status(404).json({
-        success: false,
-        message: "Room not found",
-      });
+    let filter = {};
+
+    if (keyword) {
+      filter = {
+        $or: [
+          { title: { $regex: keyword, $options: "i" } },
+          { location: { $regex: keyword, $options: "i" } },
+          { description: { $regex: keyword, $options: "i" } },
+          { roomSize: { $regex: keyword, $options: "i" } },
+        ],
+      };
     }
+
+    const rooms = await Room.find(filter).sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
-      data: room,
+      count: rooms.length,
+      data: rooms,
     });
   } catch (error) {
-    console.log("Error updating room:", error.message);
-
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-    });
-  }
-};
-
-// DELETE ROOM
-export const deleteRoom = async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const room = await Room.findById(id);
-
-    if (!room) {
-      return res.status(404).json({
-        success: false,
-        message: "Room not found",
-      });
-    }
-
-    await Room.findByIdAndDelete(id);
-
-    res.status(200).json({
-      success: true,
-      message: "Room deleted successfully",
-    });
-  } catch (error) {
-    console.log("Error deleting room:", error.message);
+    console.log("Error searching rooms:", error.message);
 
     res.status(500).json({
       success: false,
