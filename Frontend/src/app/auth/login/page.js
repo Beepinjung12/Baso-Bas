@@ -36,8 +36,8 @@ export default function Login() {
         sessionStorage.setItem("token", token);
       }
 
-      login(token, user); // ← update context (Header updates instantly!)
-      router.push("/");
+      login(user);
+      router.push(user?.role === "admin" ? "/admin" : "/");
     } catch (err) {
       setError(
         err.response?.data?.message || "Login failed. Please try again.",

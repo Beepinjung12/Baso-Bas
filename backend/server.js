@@ -1,27 +1,39 @@
 import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 import { connectDB } from "./config/db.js";
 import roomRoutes from "./routes/room.route.js";
 import authRoutes from "./routes/auth.route.js";
+import adminRoutes from "./routes/admin.route.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:3000", // ← your exact frontend URL
-    credentials: true, // ← allow cookies
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5000",
+      "http://127.0.0.1:5500",
+    ],
+    credentials: true,
   }),
 );
 app.use(cookieParser());
 
+app.use(express.static(path.join(__dirname, "../Frontend/admin")));
+
 app.get("/", (req, res) => {
   res.send("Server is ready");
 });
-
 app.use("/api/rooms", roomRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.listen(5000, () => {
   connectDB();

@@ -27,7 +27,7 @@ export default function SignupPage() {
         name: data.name,
         phone: data.phone,
         password: data.password,
-        role: isAdmin ? "admin" : "user",
+        role: isAdmin ? "owner" : "user",
         ...(isAdmin && { secretKey: data.secretKey }),
       };
 

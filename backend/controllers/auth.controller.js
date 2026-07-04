@@ -38,74 +38,85 @@ export const registerUser = async (req, res) => {
 };
 
 // LOGIN
-export const loginUser = async (req, res) => {
-  try {
-    const { phone, password } = req.body;
+// export const loginUser = async (req, res) => {
+//   try {
+//     const { phone, password } = req.body;
 
-    // find user
-    const user = await User.findOne({ phone });
+//     // find user
+//     const user = await User.findOne({ phone });
 
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid credentials",
-      });
-    }
+//     if (!user) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid credentials",
+//       });
+//     }
 
-    // compare password
-    const isMatch = await bcrypt.compare(password, user.password);
+//     // compare password
+//     const isMatch = await bcrypt.compare(password, user.password);
 
-    if (!isMatch) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid credentials",
-      });
-    }
+//     if (!isMatch) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid credentials",
+//       });
+//     }
 
-    // create jwt token
-    const token = jwt.sign(
-      {
-        id: user._id,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      },
-    );
-    // save token in cookie
-    res.cookie("jwt", token, {
-      httpOnly: true,
-      secure: false, // true in production (HTTPS)
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+//     // create jwt token
+//     const token = jwt.sign(
+//       {
+//         id: user._id,
+//         role: user.role,
+//       },
+//       process.env.JWT_SECRET,
+//       {
+//         expiresIn: "7d",
+//       },
+//     );
+//     // save token in cookie
+//     res.cookie("jwt", token, {
+//       httpOnly: true,
+//       secure: false, // true in production (HTTPS)
+//       sameSite: "strict",
+//       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+//     });
 
-    res.status(200).json({
-      success: true,
-      message: "Login successful",
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        phone: user.phone,
-        role: user.role,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       message: "Login successful",
+//       token,
+//       user: {
+//         id: user._id,
+//         name: user.name,
+//         phone: user.phone,
+//         role: user.role,
+//       },
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
 
 // GET USER PROFILE
 export const getUserProfile = async (req, res) => {
   try {
-    const userId = req.user.id;
+    // Handle system admin from .env
+    if (req.user.isSystemAdmin) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          name: process.env.SYSTEM_ADMIN_NAME,
+          phone: process.env.SYSTEM_ADMIN_PHONE,
+          role: "admin",
+        },
+      });
+    }
 
-    const user = await User.findById(userId).select("-password");
+    // Normal owner/user
+    const user = await User.findById(req.user.id).select("-password");
 
     if (!user) {
       return res.status(404).json({
@@ -125,10 +136,18 @@ export const getUserProfile = async (req, res) => {
     });
   }
 };
-
 // UPDATE USER PROFILE
 export const updateUserProfile = async (req, res) => {
   try {
+    // 👑 System admin cannot be updated
+    if (req.user.isSystemAdmin) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "System admin profile cannot be updated.",
+      });
+    }
+
     const userId = req.user.id;
     const { name, phone, currentPassword, newPassword } = req.body;
 
@@ -141,7 +160,7 @@ export const updateUserProfile = async (req, res) => {
       });
     }
 
-    // If updating password
+    // Update password
     if (currentPassword || newPassword) {
       if (!currentPassword || !newPassword) {
         return res.status(400).json({
@@ -166,21 +185,25 @@ export const updateUserProfile = async (req, res) => {
         });
       }
 
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-      user.password = hashedPassword;
+      user.password = await bcrypt.hash(newPassword, 10);
     }
 
-    // update fields
-    if (name) user.name = name;
+    // Update name
+    if (name) {
+      user.name = name;
+    }
+
+    // Update phone
     if (phone) {
-      // prevent duplicate phone
       const phoneExists = await User.findOne({ phone });
-      if (phoneExists && phoneExists._id.toString() !== userId) {
+
+      if (phoneExists && phoneExists._id.toString() !== userId.toString()) {
         return res.status(400).json({
           success: false,
           message: "Phone already in use",
         });
       }
+
       user.phone = phone;
     }
 
@@ -204,10 +227,11 @@ export const updateUserProfile = async (req, res) => {
   }
 };
 
+//logout user
 export const logoutUser = async (req, res) => {
   try {
     // Clear the httpOnly cookie
-    res.clearCookie("token", {
+    res.clearCookie("jwt", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
@@ -216,6 +240,99 @@ export const logoutUser = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Logged out successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+//login user
+export const loginUser = async (req, res) => {
+  try {
+    const { phone, password } = req.body;
+
+    // 👑 1. SYSTEM ADMIN (.env check FIRST)
+    const isSystemAdmin =
+      phone === process.env.SYSTEM_ADMIN_PHONE &&
+      password === process.env.SYSTEM_ADMIN_PASSWORD;
+
+    if (isSystemAdmin) {
+      const token = jwt.sign(
+        {
+          phone,
+          role: "admin",
+          isSystemAdmin: true,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      res.cookie("jwt", token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Admin login successful",
+        token,
+        user: {
+          phone,
+          role: "admin",
+        },
+      });
+    }
+
+    // 🏠 2. NORMAL USER / OWNER LOGIN
+    const user = await User.findOne({ phone });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        phone: user.phone,
+        role: user.role,
+      },
     });
   } catch (error) {
     res.status(500).json({
