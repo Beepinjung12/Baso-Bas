@@ -7,7 +7,6 @@ export const postRoom = async (req, res) => {
   try {
     const { title, location, description, roomSize } = req.body;
 
-    // 1. Validate input
     if (!title || !location) {
       return res.status(400).json({
         success: false,
@@ -15,21 +14,12 @@ export const postRoom = async (req, res) => {
       });
     }
 
-    // 2. Check authentication
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: "Not authenticated",
-      });
-    }
-
-    // 3. Create room safely
     const newRoom = new Room({
       title,
       location,
       description,
       roomSize,
-      owner: req.user.id,
+      owner: req.user?.id || null, // Logged-in user or null
     });
 
     await newRoom.save();
@@ -133,7 +123,7 @@ export const updateRoom = async (req, res) => {
     }
 
     // 3. Permission check (admin OR owner)
-    const isOwner = room.owner.toString() === req.user.id;
+    const isOwner = room.owner?.toString() === req.user.id;
     const isAdmin = req.user.isSystemAdmin === true;
 
     if (!isOwner && !isAdmin) {
@@ -155,7 +145,6 @@ export const updateRoom = async (req, res) => {
       success: true,
       data: room,
     });
-
   } catch (error) {
     console.log("🔥 UPDATE ROOM ERROR:", error);
 
@@ -173,7 +162,6 @@ export const updateRoom = async (req, res) => {
     });
   }
 };
-
 // =======================
 // Delete Room
 // =======================
@@ -190,10 +178,18 @@ export const deleteRoom = async (req, res) => {
       });
     }
 
+    // Safety check
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authenticated",
+      });
+    }
+
     // Only the room owner or the system admin can delete
     if (
       !req.user.isSystemAdmin &&
-      room.owner.toString() !== req.user.id
+      room.owner?.toString() !== req.user.id
     ) {
       return res.status(403).json({
         success: false,
@@ -208,14 +204,27 @@ export const deleteRoom = async (req, res) => {
       message: "Room deleted successfully",
     });
   } catch (error) {
+    console.log("🔥 DELETE ROOM ERROR:", error);
+
     res.status(500).json({
       success: false,
       message: "Server Error",
     });
   }
 };
+
+// =======================
+// Get My Rooms
+// =======================
 export const getMyRooms = async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authenticated",
+      });
+    }
+
     const rooms = await Room.find({
       owner: req.user.id,
     }).sort({ createdAt: -1 });
@@ -226,6 +235,8 @@ export const getMyRooms = async (req, res) => {
       data: rooms,
     });
   } catch (error) {
+    console.log("🔥 GET MY ROOMS ERROR:", error);
+
     res.status(500).json({
       success: false,
       message: "Server Error",

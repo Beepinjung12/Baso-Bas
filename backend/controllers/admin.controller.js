@@ -5,7 +5,7 @@ export const getAdminStats = async (req, res) => {
   try {
     const [totalUsers, totalOwners, totalRooms] = await Promise.all([
       User.countDocuments({ role: "user" }),
-      User.countDocuments({ role: "admin" }),
+      User.countDocuments({ role: "owner" }),
       Room.countDocuments(),
     ]);
 

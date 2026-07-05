@@ -65,29 +65,38 @@ const demoRoomListings = [
 const FALLBACK_IMG =
   "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=900&q=80";
 
-// Turns a raw submitted room (from the List Room form) into the shape the cards expect
+// Turns a raw submitted room (from the List Room form or the admin/backend API)
+// into the shape the cards expect
 function normalizeSubmittedRoom(room) {
-  const rentNumber = Number(room.rent) || 0;
-  // crude city guess from the location string, e.g. "POKHARA-10, KASKI" -> "Pokhara"
-  const cityGuess = room.location
-    ? room.location.split(",")[0].replace(/-\d+$/, "").trim()
-    : "Unknown";
+  const rentNumber = Number(room.rent ?? room.price ?? 0) || 0;
+
+  const cityGuess =
+    room.city ||
+    (room.location
+      ? room.location.split(",")[0].replace(/-\d+$/, "").trim()
+      : "Unknown");
+
+  const beds = Number(room.numberOfRooms) || Number(room.beds) || 1;
+  const area = room.roomSize || room.area || "—";
 
   return {
-    id: room.id,
-    title: room.title,
-    location: room.location,
+    id: room._id || room.id || room.title,
+    title: room.title || "Room Listing",
+    location: room.location || "Location not provided",
     city: cityGuess,
     price: rentNumber,
-    priceLabel: `Rs ${rentNumber.toLocaleString()}/mo`,
-    beds: room.rentType?.toLowerCase().includes("2") ? 2 : 1,
-    baths: 1,
-    area: "—",
+    priceLabel:
+      rentNumber > 0
+        ? `Rs ${rentNumber.toLocaleString()}/mo`
+        : "Contact for price",
+    beds,
+    baths: room.baths || 1,
+    area,
     img: FALLBACK_IMG,
     contact: room.contact,
     whatsapp: room.whatsapp,
     tenancy: room.tenancy,
-    facilities: room.facilities,
+    facilities: room.facilities || room.description,
     parking: room.parking,
     isUserSubmitted: true,
   };
@@ -96,23 +105,23 @@ function normalizeSubmittedRoom(room) {
 export default function ExploreClient({ popularCities, submittedRooms = [] }) {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+      useEffect(() => {
+        const token = sessionStorage.getItem("token");
+        setIsLoggedIn(!!token);
+      }, []);
 
+      const [searchQuery, setSearchQuery] = useState("");
+      const [selectedCity, setSelectedCity] = useState("All");
+      const [maxPrice, setMaxPrice] = useState(15000);
 
-    useEffect(() => {
-      const token = sessionStorage.getItem("token");
+      // Real listings first, then demo listings
+      const roomListings = useMemo(() => {
+        const normalized = Array.isArray(submittedRooms)
+          ? submittedRooms.map(normalizeSubmittedRoom)
+          : [];
 
-      setIsLoggedIn(!!token);
-    }, []);
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCity, setSelectedCity] = useState("All");
-  const [maxPrice, setMaxPrice] = useState(15000);
-
-  // Real listings first, then demo listings
-  const roomListings = useMemo(() => {
-    const normalized = submittedRooms.map(normalizeSubmittedRoom);
-    return [...normalized, ...demoRoomListings];
-  }, [submittedRooms]);
+        return [...normalized, ...demoRoomListings];
+      }, [submittedRooms]);
 
   const filterableCities = useMemo(
     () => ["All", ...new Set(roomListings.map((room) => room.city))],
@@ -237,23 +246,7 @@ export default function ExploreClient({ popularCities, submittedRooms = [] }) {
               }}
             >
               Browse Rooms
-            </Link>
-            {!isLoggedIn && (
-              <Link
-                href="/auth/signup"
-                style={{
-                  background: "rgba(255,255,255,0.16)",
-                  color: "white",
-                  padding: "14px 28px",
-                  borderRadius: 999,
-                  fontWeight: 700,
-                  textDecoration: "none",
-                  border: "1px solid rgba(255,255,255,0.28)",
-                }}
-              >
-                Start Free
-              </Link>
-            )}                   
+            </Link>                
           </div>
         </div>
       </section>

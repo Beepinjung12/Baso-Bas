@@ -15,9 +15,9 @@ const router = express.Router();
 router.get("/", getRooms);
 router.get("/search", searchRooms);
 
-router.post("/", protectRoute,  postRoom);
+router.post("/",  postRoom);
 router.put("/:id", protectRoute, updateRoom);
 router.delete("/:id", protectRoute, deleteRoom);
-router.get("/my-rooms", protectRoute, getMyRooms);
+router.get("/my-rooms", getMyRooms);
 
 export default router;
