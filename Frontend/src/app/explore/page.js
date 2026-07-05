@@ -1,4 +1,5 @@
 import ExploreClient from "./ExploreClient";
+import config from "@/app/config";
 
 export const metadata = {
   title: "Explore Rooms",
@@ -13,12 +14,18 @@ const popularCities = [
 
 async function getSubmittedRooms() {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/rooms`,
-      { cache: "no-store" }
-    );
+    const res = await fetch(`${config.apiUrl}/api/rooms`, {
+      cache: "no-store",
+    });
+
     if (!res.ok) return [];
-    return res.json();
+
+    const data = await res.json();
+
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.data)) return data.data;
+
+    return [];
   } catch {
     return [];
   }

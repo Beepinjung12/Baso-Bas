@@ -29,7 +29,7 @@ export const postRoom = async (req, res) => {
       location,
       description,
       roomSize,
-      owner: req.user.id,
+      owner: req.user?.id || null,
     });
 
     await newRoom.save();
@@ -38,7 +38,6 @@ export const postRoom = async (req, res) => {
       success: true,
       data: newRoom,
     });
-
   } catch (error) {
     console.log("🔥 POST ROOM ERROR:", error);
 
@@ -133,7 +132,7 @@ export const updateRoom = async (req, res) => {
     }
 
     // 3. Permission check (admin OR owner)
-    const isOwner = room.owner.toString() === req.user.id;
+    const isOwner = room.owner?.toString() === req.user.id;
     const isAdmin = req.user.isSystemAdmin === true;
 
     if (!isOwner && !isAdmin) {
@@ -155,7 +154,6 @@ export const updateRoom = async (req, res) => {
       success: true,
       data: room,
     });
-
   } catch (error) {
     console.log("🔥 UPDATE ROOM ERROR:", error);
 
@@ -191,10 +189,7 @@ export const deleteRoom = async (req, res) => {
     }
 
     // Only the room owner or the system admin can delete
-    if (
-      !req.user.isSystemAdmin &&
-      room.owner.toString() !== req.user.id
-    ) {
+    if (!req.user.isSystemAdmin && room.owner?.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
         message: "You are not authorized to delete this room",
