@@ -1,5 +1,7 @@
 "use client";
+
 import { useMemo, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   FaMapMarkerAlt,
@@ -94,19 +96,18 @@ function normalizeSubmittedRoom(room) {
 }
 
 export default function ExploreClient({ popularCities, submittedRooms = [] }) {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-
-
-    useEffect(() => {
-      const token = sessionStorage.getItem("token");
-
-      setIsLoggedIn(!!token);
-    }, []);
-
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState("All");
   const [maxPrice, setMaxPrice] = useState(15000);
+  const searchParams = useSearchParams();
+
+useEffect(() => {
+  const search = searchParams.get("search");
+
+  if (search) {
+    setSearchQuery(search);
+  }
+}, [searchParams]);
 
   // Real listings first, then demo listings
   const roomListings = useMemo(() => {
@@ -238,22 +239,20 @@ export default function ExploreClient({ popularCities, submittedRooms = [] }) {
             >
               Browse Rooms
             </Link>
-            {!isLoggedIn && (
-              <Link
-                href="/auth/signup"
-                style={{
-                  background: "rgba(255,255,255,0.16)",
-                  color: "white",
-                  padding: "14px 28px",
-                  borderRadius: 999,
-                  fontWeight: 700,
-                  textDecoration: "none",
-                  border: "1px solid rgba(255,255,255,0.28)",
-                }}
-              >
-                Start Free
-              </Link>
-            )}                   
+            <Link
+              href="/auth/signup"
+              style={{
+                background: "rgba(255,255,255,0.16)",
+                color: "white",
+                padding: "14px 28px",
+                borderRadius: 999,
+                fontWeight: 700,
+                textDecoration: "none",
+                border: "1px solid rgba(255,255,255,0.28)",
+              }}
+            >
+              Start Free
+            </Link>
           </div>
         </div>
       </section>

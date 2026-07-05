@@ -31,9 +31,9 @@ const Header = () => {
         {/* NAV LINKS */}
         <ul className="flex list-none gap-8">
           <li><Link href="explore" className="text-[14px] text-slate-500">Explore</Link></li>
-          <li><Link href="list-room" className="text-[14px] text-slate-500">List Room</Link></li>
+          <li><Link href="rent-room" className="text-[14px] text-slate-500">Rent Room</Link></li>
           <li><Link href="/services" className="text-[14px] text-slate-500">Services</Link></li>
-          <li><Link href="/about" className="text-[14px] text-slate-500">About</Link></li>
+          <li><Link href="/about" className="text-[14px] text-slate-500">About</Link></li>  
         </ul>
 
         {/* RIGHT SIDE */}
