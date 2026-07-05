@@ -68,7 +68,7 @@ export default function ListRoomClient() {
             fontFamily: "Arial, sans-serif",
           }}
         >
-          LIST YOUR ROOM
+          RENT YOUR ROOM
         </span>
         <h1
           style={{
@@ -111,7 +111,7 @@ export default function ListRoomClient() {
                 textAlign: "center",
               }}
             >
-              ✅ Room listed successfully! Redirecting to Explore...
+              ✅ Room rented successfully! Redirecting to Explore...
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ fontFamily: "Arial, sans-serif" }}>
@@ -221,7 +221,7 @@ export default function ListRoomClient() {
                   fontFamily: "Arial, sans-serif",
                 }}
               >
-                {submitting ? "Submitting..." : "List My Room"}
+                {submitting ? "Submitting..." : "Rent My Room"}
               </button>
             </form>
           )}
