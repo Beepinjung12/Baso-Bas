@@ -48,6 +48,77 @@
       };
     </script>
 
+    <script>
+      document.addEventListener("DOMContentLoaded",()=>{
+
+        const searchInput=document.getElementById("searchInput");
+        const priceFilter=document.getElementById("priceFilter");
+        const searchButton=document.getElementById("searchButton");
+
+        const rooms=document.querySelectorAll("#roomGrid > div");
+
+
+        searchButton.addEventListener("click",()=>{
+
+          const searchValue=searchInput.value.toLowerCase();
+          const selectedPrice=priceFilter.value;
+
+
+          rooms.forEach(room=>{
+
+            const roomText=room.innerText.toLowerCase();
+
+
+            const priceText=
+            room.querySelector(".text-sky600")?.innerText || "";
+
+
+            const price=Number(
+              priceText.replace(/[^0-9]/g,"")
+            );
+
+
+            const matchSearch=
+            roomText.includes(searchValue);
+
+
+            let matchPrice=true;
+
+
+            if(selectedPrice==="500"){
+              matchPrice=price<500;
+            }
+
+            else if(selectedPrice==="1000"){
+              matchPrice=price>=500 && price<=1000;
+            }
+
+            else if(selectedPrice==="1001"){
+              matchPrice=price>1000;
+            }
+
+
+            if(matchSearch && matchPrice){
+              room.style.display="block";
+            }
+
+            else{
+              room.style.display="none";
+            }
+
+          });
+
+
+          document
+          .querySelector("#roomGrid")
+          .scrollIntoView({
+            behavior:"smooth"
+          });
+
+        });
+
+      });
+    </script>
     <title>BASOBAS</title>
   </head>
 
@@ -170,13 +241,14 @@
         <i class="ri-search-line text-slate-400"></i>
 
         <input
+          id="searchInput"
           type="text"
           placeholder="Search by location or room type..."
           class="flex-1 bg-transparent text-[14px] outline-none"
         />
 
         <select
-          class="cursor-pointer border-l border-sky200 bg-transparent px-3 text-[13px] text-slate-500 outline-none max-md:w-full max-md:border-l-0 max-md:border-t max-md:pt-2"
+          class="cursor-pointer border-l border-sky200 bg-transparent px-3 text-[13px] text-slate-500 outline-none"
         >
           <option>Any price</option>
           <option>Under $500</option>
@@ -185,7 +257,8 @@
         </select>
 
         <button
-          class="whitespace-nowrap rounded-full bg-sky500 px-6 py-2.5 text-[14px] font-medium text-white transition hover:bg-sky600 max-md:w-full"
+          id="searchButton"
+          class="whitespace-nowrap rounded-full bg-sky500 px-6 py-2.5 text-[14px] font-medium text-white"
         >
           Search rooms
         </button>
@@ -297,7 +370,10 @@
       </div>
 
       <!-- ROOM GRID -->
-      <div class="grid grid-cols-4 gap-4 max-lg:grid-cols-2 max-md:grid-cols-1">
+      <div
+        id="roomGrid"
+        class="grid grid-cols-4 gap-4 max-lg:grid-cols-2 max-md:grid-cols-1"
+      >
         <!-- CARD -->
         <div
           class="overflow-hidden rounded-2xl border border-sky200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"

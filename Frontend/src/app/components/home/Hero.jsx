@@ -1,6 +1,13 @@
+"use client";
 import React from "react";
 
-const Hero = () => {
+const Hero = ({
+  search,
+  setSearch,
+  price,
+  setPrice,
+  handleSearch
+}) => {
   return (
     <section className="relative overflow-hidden px-8 py-[70px] pb-20 text-center max-md:px-4 max-md:py-12"
       style={{ background: "linear-gradient(135deg, #0284c7, #38bdf8, #bae6fd)" }}>
@@ -34,17 +41,38 @@ const Hero = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
         </svg>
         <input
+          value={search}
+          onChange={(e)=>setSearch(e.target.value)}
           type="text"
           placeholder="Search by location or room type..."
           className="flex-1 bg-transparent text-[14px] outline-none text-slate-700 placeholder-slate-400"
         />
-        <select className="cursor-pointer border-l border-sky-200 bg-transparent pl-3 pr-1 text-[13px] text-slate-500 outline-none">
-          <option>Any price</option>
-          <option>Under $500</option>
-          <option>$500 – $1000</option>
-          <option>$1000+</option>
+       <select
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          className="cursor-pointer border-l border-sky-200 bg-transparent pl-3 pr-1 text-[13px] text-slate-500 outline-none"
+        >
+          <option value="">
+            Any price
+          </option>
+
+          <option value="500">
+            Under $500
+          </option>
+
+          <option value="500-1000">
+            $500 - $1000
+          </option>
+
+          <option value="1000+">
+            $1000+
+          </option>
+
         </select>
-        <button className="whitespace-nowrap rounded-full bg-sky-500 px-6 py-2.5 text-[14px] font-medium text-white transition hover:bg-sky-600">
+        <button
+          onClick={handleSearch}
+          className="whitespace-nowrap rounded-full bg-sky-500 px-6 py-2.5 text-[14px] font-medium text-white transition hover:bg-sky-600"
+        >
           Search rooms
         </button>
       </div>
