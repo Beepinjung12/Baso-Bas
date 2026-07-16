@@ -10,10 +10,13 @@ import {
 
 const router = express.Router();
 
+// Admin login (public)
 router.post("/login", adminLogin);
 
+// All routes below require authentication and admin role
 router.use(protectRoute, adminOnly);
 
+// Admin dashboard routes
 router.get("/stats", getAdminStats);
 router.get("/users", getAllUsers);
 router.delete("/users/:id", deleteUser);
