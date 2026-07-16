@@ -5,28 +5,84 @@ const roomSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
-    },
-
-    // photo: {
-    //   type: String,
-    //   required: true,
-    // },
-
-    roomSize: {
-      type: String,
-    },
-
-    numberOfRooms: {
-      type: Number,
+      trim: true,
     },
 
     location: {
       type: String,
       required: true,
+      trim: true,
     },
 
     description: {
       type: String,
+      default: "",
+    },
+
+    rent: {
+      type: Number,
+      default: 0,
+    },
+
+    rentType: {
+      type: String,
+      default: "Monthly",
+    },
+
+    tenancy: {
+      type: String,
+      default: "Anyone",
+    },
+
+    roomSize: {
+      type: String,
+      default: "",
+    },
+
+    numberOfRooms: {
+      type: Number,
+      default: 1,
+    },
+
+    parking: {
+      type: Boolean,
+      default: false,
+    },
+
+    facilities: [
+      {
+        type: String,
+      },
+    ],
+
+    contact: {
+      type: String,
+      default: "",
+    },
+
+    whatsapp: {
+      type: String,
+      default: "",
+    },
+
+    // Cloudinary images only
+    images: [
+      {
+        url: {
+          type: String,
+          required: true,
+        },
+        public_id: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+
+    // Thumbnail / Cover Image
+    image: {
+      type: String,
+      default: "",
     },
 
     owner: {
@@ -37,9 +93,7 @@ const roomSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
-roomSchema.index({ title: 1 }, { unique: true }); // Unique index on title
-const Room = mongoose.model("Room", roomSchema);
 
-export default Room;
+export default mongoose.model("Room", roomSchema);

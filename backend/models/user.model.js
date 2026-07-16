@@ -7,15 +7,38 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
+    email: {
+        type: String,
+        unique: true,
+        sparse: true,
+        default: "",
+      },
+    bio: {
+        type: String,
+        default: ""
+    },
+    address: {
+        type: String,
+        default: ""
+    },
     phone: {
       type: String,
       required: true,
       unique: true,
     },
 
+    profileImagePublicId: {
+      type: String,
+      default: "",
+    },
+
     password: {
       type: String,
       required: true,
+    },
+    profileImage: {
+        type: String,
+        default: ""
     },
 
     role: {

@@ -1,3 +1,5 @@
+"use client";
+
 export default function RoomFilters({
   searchQuery,
   setSearchQuery,
@@ -7,89 +9,104 @@ export default function RoomFilters({
   maxPrice,
   setMaxPrice,
 }) {
-
-  const priceOptions=[
-    15000,
-    12000,
-    10000,
-    8000
+  const priceOptions = [
+    {
+      label: "Any price",
+      value: 999999,
+    },
+    {
+      label: "Under Rs 8,000",
+      value: 8000,
+    },
+    {
+      label: "Under Rs 10,000",
+      value: 10000,
+    },
+    {
+      label: "Under Rs 15,000",
+      value: 15000,
+    },
+    {
+      label: "Under Rs 25,000",
+      value: 25000,
+    },
+    {
+      label: "Under Rs 50,000",
+      value: 50000,
+    },
   ];
 
-  return(
-    <div className="grid gap-5 mb-8">
+  function clearFilters() {
+    setSearchQuery("");
+    setSelectedCity("All");
+    setMaxPrice(50000);
+  }
 
-      <div className="grid md:grid-cols-3 gap-4">
-
-        <label className="flex flex-col gap-2">
-
-          <span className="text-sm text-slate-600">
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-8">
+      <div className="grid md:grid-cols-3 gap-5">
+        {/* Search */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-slate-700">
             Search rooms
-          </span>
-
+          </label>
           <input
             type="text"
             value={searchQuery}
-            onChange={(e)=>setSearchQuery(e.target.value)}
-            placeholder="Search by title or location"
-            className="border border-slate-300 rounded-xl px-4 py-3 outline-none focus:border-sky-500"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search title or location..."
+            className="border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-sky-400"
           />
+        </div>
 
-        </label>
-
-
-        <label className="flex flex-col gap-2">
-
-          <span className="text-sm text-slate-600">
+        {/* City */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-slate-700">
             City
-          </span>
-
+          </label>
           <select
             value={selectedCity}
-            onChange={(e)=>setSelectedCity(e.target.value)}
-            className="border border-slate-300 rounded-xl px-4 py-3 outline-none"
+            onChange={(e) => setSelectedCity(e.target.value)}
+            className="border border-slate-300 rounded-xl px-4 py-3 outline-none bg-white"
           >
-
-            {cities.map(city=>(
-              <option
-                key={city}
-                value={city}
-              >
+            {cities.map(city => (
+              <option key={city} value={city}>
                 {city}
               </option>
             ))}
-
           </select>
+        </div>
 
-        </label>
-
-
-        <label className="flex flex-col gap-2">
-
-          <span className="text-sm text-slate-600">
-            Max price
-          </span>
-
+        {/* Price */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-slate-700">
+            Maximum rent
+          </label>
           <select
             value={maxPrice}
-            onChange={(e)=>setMaxPrice(Number(e.target.value))}
-            className="border border-slate-300 rounded-xl px-4 py-3 outline-none"
+            onChange={(e) => setMaxPrice(Number(e.target.value))}
+            className="border border-slate-300 rounded-xl px-4 py-3 outline-none bg-white"
           >
-
-            {priceOptions.map(price=>(
-              <option
-                key={price}
-                value={price}
-              >
-                Up to Rs {price.toLocaleString()}
+            {priceOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
-
           </select>
-
-        </label>
-
+        </div>
       </div>
 
+      <div className="flex justify-between items-center mt-5">
+        <p className="text-sm text-slate-500">
+          Find your perfect room
+        </p>
+        <button
+          onClick={clearFilters}
+          className="text-sm text-sky-600 hover:text-sky-700 font-medium"
+        >
+          Clear filters
+        </button>
+      </div>
     </div>
   );
 }

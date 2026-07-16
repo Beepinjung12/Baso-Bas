@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter, useParams } from "next/navigation";
+
 import config from "@/app/config";
+import RoomImageUpload from "@/app/components/RoomImageUpload";
+import { updateRoom } from "@/app/api/rooms";
 
 export default function EditRoomPage() {
   const { id } = useParams();
@@ -14,224 +17,223 @@ export default function EditRoomPage() {
   const [form, setForm] = useState({
     title: "",
     location: "",
-    description: "",
+    rent: "",
+    contact: "",
+    whatsapp: "",
     roomSize: "",
+    numberOfRooms: "",
+    description: "",
   });
 
+  const [imageFiles, setImageFiles] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+
   useEffect(() => {
-    const fetchRoom = async () => {
+    async function fetchRoom() {
       try {
         const res = await axios.get(
-          `${config.apiUrl}/api/rooms`,
+          `${config.apiUrl}/api/rooms/${id}`,
           {
-            withCredentials: true,
+            withCredentials: true
           }
         );
 
-        const room = res.data.data.find((r) => r._id === id);
+        const room = res.data.data;
+
+        console.log("EDIT ROOM DATA:", room);
 
         if (room) {
           setForm({
             title: room.title || "",
             location: room.location || "",
-            description: room.description || "",
+            rent: room.rent || "",
+            contact: room.contact || "",
+            whatsapp: room.whatsapp || "",
             roomSize: room.roomSize || "",
+            numberOfRooms: room.numberOfRooms || "",
+            description: room.description || "",
           });
-        }
 
-        setLoading(false);
-      } catch (err) {
-        console.log(err);
+          setExistingImages(room.images || []);
+        }
+      } catch (error) {
+        console.log("FETCH ROOM ERROR", error);
+      } finally {
         setLoading(false);
       }
-    };
+    }
 
-    fetchRoom();
+    if (id) {
+      fetchRoom();
+    }
   }, [id]);
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    });
+  };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
 
     try {
-      await axios.put(
-        `${config.apiUrl}/api/rooms/${id}`,
-        form,
+      await updateRoom(
+        id,
         {
-          withCredentials: true,
-        }
+          ...form,
+          rent: Number(form.rent),
+          numberOfRooms: Number(form.numberOfRooms)
+        },
+        imageFiles,
+        existingImages
       );
 
       alert("Room updated successfully!");
-
       router.push("/owner/list-rooms");
-    } catch (err) {
-      console.log(err);
-      alert(err?.response?.data?.message || "Update failed");
+    } catch (error) {
+      console.log(error);
+      alert(
+        error?.response?.data?.message ||
+        "Update failed"
+      );
     }
   };
 
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-100">
-        <div className="flex items-center gap-3 rounded-2xl bg-white px-8 py-5 shadow-lg">
-          <div className="h-6 w-6 animate-spin rounded-full border-4 border-sky-200 border-t-sky-600"></div>
-          <span className="font-medium text-slate-600">
-            Loading room...
-          </span>
-        </div>
+        Loading room...
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-slate-100">
+      <section className="bg-gradient-to-br from-sky-600 via-sky-400 to-sky-200 px-10 py-14">
+        <h1 className="text-5xl font-semibold text-white">
+          Edit your
+          <br />
+          room listing
+        </h1>
 
-      {/* Hero */}
-
-      <section className="relative overflow-hidden bg-gradient-to-br from-sky-600 via-sky-400 to-sky-200 px-10 py-14">
-
-        <div className="absolute -top-20 -right-20 h-80 w-80 rounded-full bg-white/10"></div>
-        <div className="absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-white/10"></div>
-
-        <div className="relative z-10">
-
-          <h1 className="font-playfair text-5xl font-semibold leading-tight text-white">
-            Edit your
-            <br />
-            room listing
-          </h1>
-
-          <p className="mt-4 max-w-xl text-lg text-white/80">
-            Update your room details to keep your listing accurate and
-            attractive for tenants.
-          </p>
-
-        </div>
-
+        <p className="mt-4 text-white/80">
+          Update your room details.
+        </p>
       </section>
 
-      {/* Form */}
+      <div className="px-10 pb-10 -mt-10">
+        <div className="mx-auto max-w-5xl rounded-3xl bg-white p-8 shadow-xl">
+          <h2 className="text-3xl font-semibold text-slate-800">
+            Room Information
+          </h2>
 
-      <div className="relative z-20 -mt-10 px-10 pb-10">
-
-        <div className="mx-auto max-w-4xl rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
-
-          <div className="mb-8">
-
-            <h2 className="font-playfair text-3xl font-semibold text-slate-800">
-              Room Information
-            </h2>
-
-            <p className="mt-2 text-slate-500">
-              Modify your room information below and save your changes.
-            </p>
-
-          </div>
-
-          <form
-            onSubmit={handleUpdate}
-            className="space-y-6"
-          >
-
+          <form onSubmit={handleUpdate} className="mt-8 space-y-6">
             {/* Title */}
-
             <div>
-
-              <label className="mb-2 block font-medium text-slate-700">
-                Room Title
-              </label>
-
+              <label>Room Title</label>
               <input
-                type="text"
+                name="title"
                 value={form.title}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    title: e.target.value,
-                  })
-                }
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
-                placeholder="Modern Apartment"
+                onChange={handleChange}
+                className="w-full rounded-xl border px-4 py-3"
               />
-
             </div>
 
             {/* Location */}
-
             <div>
-
-              <label className="mb-2 block font-medium text-slate-700">
-                Location
-              </label>
-
+              <label>Location</label>
               <input
-                type="text"
+                name="location"
                 value={form.location}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    location: e.target.value,
-                  })
-                }
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
-                placeholder="Kathmandu"
+                onChange={handleChange}
+                className="w-full rounded-xl border px-4 py-3"
               />
-
             </div>
 
-            {/* Room Size */}
+            {/* Rent + Contact */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label>Rent</label>
+                <input
+                  type="number"
+                  name="rent"
+                  value={form.rent}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border px-4 py-3"
+                />
+              </div>
 
+              <div>
+                <label>Contact Number</label>
+                <input
+                  name="contact"
+                  value={form.contact}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border px-4 py-3"
+                />
+              </div>
+            </div>
+
+            {/* Whatsapp */}
             <div>
-
-              <label className="mb-2 block font-medium text-slate-700">
-                Room Size
-              </label>
-
+              <label>Whatsapp Number</label>
               <input
-                type="text"
-                value={form.roomSize}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    roomSize: e.target.value,
-                  })
-                }
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
-                placeholder="200 sq.ft"
+                name="whatsapp"
+                value={form.whatsapp}
+                onChange={handleChange}
+                className="w-full rounded-xl border px-4 py-3"
               />
+            </div>
 
+            {/* Room Size + Number */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label>Room Size</label>
+                <input
+                  name="roomSize"
+                  value={form.roomSize}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border px-4 py-3"
+                />
+              </div>
+
+              <div>
+                <label>Number of Rooms</label>
+                <input
+                  type="number"
+                  name="numberOfRooms"
+                  value={form.numberOfRooms}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border px-4 py-3"
+                />
+              </div>
             </div>
 
             {/* Description */}
-
             <div>
-
-              <label className="mb-2 block font-medium text-slate-700">
-                Description
-              </label>
-
+              <label>Description</label>
               <textarea
-                rows={6}
+                rows="6"
+                name="description"
                 value={form.description}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    description: e.target.value,
-                  })
-                }
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
-                placeholder="Write a detailed description..."
+                onChange={handleChange}
+                className="w-full rounded-xl border px-4 py-3"
               />
-
             </div>
 
-            {/* Buttons */}
+            <RoomImageUpload
+              files={imageFiles}
+              onFilesChange={setImageFiles}
+              existingImages={existingImages}
+              onExistingImagesChange={setExistingImages}
+            />
 
-            <div className="flex gap-4 pt-2">
-
+            <div className="flex gap-4 pt-4">
               <button
                 type="submit"
-                className="rounded-xl bg-sky-600 px-8 py-3 font-semibold text-white transition hover:bg-sky-700 hover:shadow-lg"
+                className="rounded-xl bg-sky-600 px-8 py-3 font-semibold text-white"
               >
                 💾 Save Changes
               </button>
@@ -239,19 +241,14 @@ export default function EditRoomPage() {
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="rounded-xl border border-slate-300 px-8 py-3 font-semibold text-slate-700 transition hover:bg-slate-100"
+                className="rounded-xl border px-8 py-3"
               >
                 Cancel
               </button>
-
             </div>
-
           </form>
-
         </div>
-
       </div>
-
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import OwnerGuard from "../components/owner/OwnerGuard";
-import OwnerSidebar from "../components/owner/OwnerSidebar";
+import OwnerGuard from "@/app/components/owner/OwnerGuard";
+import OwnerSidebar from "@/app/components/owner/OwnerSidebar";
 
 export default function OwnerLayout({ children }) {
   return (

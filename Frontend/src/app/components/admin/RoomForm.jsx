@@ -1,9 +1,20 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import RoomImageUpload from "@/app/components/RoomImageUpload";
 
 export default function RoomForm({ initialData, onSubmit, onCancel, loading }) {
   const isEditing = !!initialData;
+  const [imageFiles, setImageFiles] = useState([]);
+  const [existingImages, setExistingImages] = useState(
+    initialData?.images || []
+  );
+
+  useEffect(() => {
+    setExistingImages(initialData?.images || []);
+    setImageFiles([]);
+  }, [initialData]);
 
   const {
     register,
@@ -20,12 +31,16 @@ export default function RoomForm({ initialData, onSubmit, onCancel, loading }) {
   });
 
   const handleFormSubmit = (data) => {
-    onSubmit({
-      ...data,
-      numberOfRooms: data.numberOfRooms
-        ? Number(data.numberOfRooms)
-        : undefined,
-    });
+    onSubmit(
+      {
+        ...data,
+        numberOfRooms: data.numberOfRooms
+          ? Number(data.numberOfRooms)
+          : undefined,
+      },
+      imageFiles,
+      existingImages
+    );
   };
 
   return (
@@ -104,6 +119,14 @@ export default function RoomForm({ initialData, onSubmit, onCancel, loading }) {
           {...register("description")}
         />
       </div>
+
+      <RoomImageUpload
+        label="Room Photos"
+        files={imageFiles}
+        onFilesChange={setImageFiles}
+        existingImages={existingImages}
+        onExistingImagesChange={setExistingImages}
+      />
 
       <div className="flex justify-end gap-2 pt-2">
         {onCancel && (

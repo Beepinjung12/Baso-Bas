@@ -6,16 +6,68 @@ const api = axios.create({
   withCredentials: true,
 });
 
+function buildRoomFormData(
+  data,
+  imageFiles = [],
+  existingImages = []
+) {
+  const formData = new FormData();
+
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      formData.append(key, value);
+    }
+  });
+
+  // Keep existing images
+  formData.append(
+    "existingImages",
+    JSON.stringify(existingImages)
+  );
+
+  // Add new uploaded images
+  imageFiles.forEach((file) => {
+    formData.append("images", file);
+  });
+
+  return formData;
+}
+
 export async function getRooms() {
   return api.get("/api/rooms");
 }
 
-export async function createRoom(data) {
+export async function createRoom(data, imageFiles = []) {
+  if (imageFiles.length > 0) {
+    const formData = buildRoomFormData(data, imageFiles, []);
+
+    return api.post("/api/rooms", formData);
+  }
+
   return api.post("/api/rooms", data);
 }
 
-export async function updateRoom(id, data) {
-  return api.put(`/api/rooms/${id}`, data);
+export async function updateRoom(
+  id,
+  data,
+  imageFiles = [],
+  existingImages = []
+) {
+  const formData = buildRoomFormData(
+    data,
+    imageFiles,
+    existingImages
+  );
+
+  return api.put(
+    `/api/rooms/${id}`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
 }
 
 export async function deleteRoom(id) {
@@ -23,5 +75,9 @@ export async function deleteRoom(id) {
 }
 
 export async function searchRooms(keyword) {
-  return api.get("/api/rooms/search", { params: { keyword } });
+  return api.get("/api/rooms/search", {
+    params: {
+      keyword,
+    },
+  });
 }

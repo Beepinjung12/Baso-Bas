@@ -5,7 +5,6 @@ import React from "react";
 export default function Hero({ profile, initials }) {
 
   return (
-
     <section className="
       relative
       overflow-hidden
@@ -18,10 +17,6 @@ export default function Hero({ profile, initials }) {
       max-md:px-5
       max-md:py-12
     ">
-
-
-      {/* Background Effects */}
-
       <div className="
         absolute
         -right-24
@@ -32,8 +27,6 @@ export default function Hero({ profile, initials }) {
         bg-white/10
         blur-3xl
       "/>
-
-
       <div className="
         absolute
         -bottom-24
@@ -44,9 +37,6 @@ export default function Hero({ profile, initials }) {
         bg-white/10
         blur-3xl
       "/>
-
-
-
       <div className="
         relative
         z-10
@@ -57,13 +47,7 @@ export default function Hero({ profile, initials }) {
         max-lg:flex-col
         max-lg:items-start
       ">
-
-
-        {/* Left Content */}
-
         <div>
-
-
           <div className="
             mb-5
             inline-flex
@@ -79,18 +63,11 @@ export default function Hero({ profile, initials }) {
             text-white
             backdrop-blur-lg
           ">
-
             ✨
-
             <span>
               Premium Owner Profile
             </span>
-
           </div>
-
-
-
-
           <h1 className="
             text-5xl
             font-bold
@@ -98,18 +75,10 @@ export default function Hero({ profile, initials }) {
             text-white
             max-md:text-4xl
           ">
-
             Welcome,
-
             <br />
-
             {profile?.name || "User"}
-
           </h1>
-
-
-
-
           <p className="
             mt-5
             max-w-2xl
@@ -122,19 +91,8 @@ export default function Hero({ profile, initials }) {
             update your profile details,
             and maintain a professional profile
             for your tenants.
-
           </p>
-
-
-
         </div>
-
-
-
-
-
-        {/* Avatar */}
-
         <div className="hidden lg:block">
 
 
@@ -147,8 +105,6 @@ export default function Hero({ profile, initials }) {
             backdrop-blur-xl
             shadow-2xl
           ">
-
-
             <div className="
               flex
               h-40
@@ -161,24 +117,11 @@ export default function Hero({ profile, initials }) {
               font-bold
               text-sky-700
             ">
-
               {initials}
-
             </div>
-
-
           </div>
-
-
         </div>
-
-
-
       </div>
-
-
-
     </section>
-
   );
 }

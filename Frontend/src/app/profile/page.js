@@ -38,7 +38,6 @@ export default function ProfilePage() {
     fetchProfile();
   }, [router]);
 
-
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -48,7 +47,6 @@ export default function ProfilePage() {
       </div>
     );
   }
-
 
   if (error) {
     return (
@@ -60,7 +58,6 @@ export default function ProfilePage() {
     );
   }
 
-
   const initials =
     profile?.name
       ?.split(" ")
@@ -68,24 +65,18 @@ export default function ProfilePage() {
       .join("")
       .toUpperCase() || "?";
 
-
   return (
     <div className="min-h-screen bg-slate-100">
-
-      <Hero 
-        profile={profile} 
-        initials={initials} 
+      <Hero
+        profile={profile}
+        initials={initials}
       />
 
-
       <div className="relative z-20 -mt-12 px-10 pb-12 space-y-10">
-
-
         <ProfileCard
           profile={profile}
           initials={initials}
         />
-
 
         <div className="flex justify-end">
           <button
@@ -96,7 +87,6 @@ export default function ProfilePage() {
           </button>
         </div>
 
-
         <QuickStats profile={profile} />
 
         <AccountOverview />
@@ -104,10 +94,7 @@ export default function ProfilePage() {
         <PersonalInfo profile={profile} />
 
         <ProfileStrength profile={profile} />
-
-
       </div>
-
     </div>
   );
 }

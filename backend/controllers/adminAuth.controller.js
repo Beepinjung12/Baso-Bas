@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import admin from "../models/admin.model.js";
+import Admin from "../models/admin.model.js";
 
 export const adminLogin = async (req, res) => {
   try {
@@ -13,7 +13,7 @@ export const adminLogin = async (req, res) => {
       });
     }
 
-    const admin = await admin.findOne({ email: email.toLowerCase().trim() });
+    const admin = await Admin.findOne({ email: email.toLowerCase().trim() });
 
     if (!admin) {
       return res.status(401).json({

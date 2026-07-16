@@ -1,96 +1,78 @@
 import Link from "next/link";
 
-const heroHighlights=[
+const heroHighlights = [
   {
-    label:"Search",
-    value:"Kathmandu"
+    label: "Available Rooms",
+    value: "1000+ Listings",
   },
   {
-    label:"When",
-    value:"Available now"
+    label: "Locations",
+    value: "Kathmandu • Pokhara",
   },
   {
-    label:"Price",
-    value:"Under Rs 15,000"
-  }
+    label: "Trusted",
+    value: "Direct Owner Contact",
+  },
 ];
 
-export default function ExploreHero(){
-
-  return(
+export default function ExploreHero() {
+  return (
     <section
-      className="relative overflow-hidden text-center px-6 py-20 text-white"
+      className="relative overflow-hidden px-6 py-24 text-white"
       style={{
-        background:"linear-gradient(135deg,#0369a1,#0ea5e9,#7dd3fc)"
+        background: "linear-gradient(135deg,#075985,#0284c7,#38bdf8)"
       }}
     >
+      {/* Background shapes */}
+      <div className="absolute w-96 h-96 rounded-full bg-white/10 blur-3xl -right-32 -top-32" />
+      <div className="absolute w-80 h-80 rounded-full bg-white/10 blur-3xl -left-32 bottom-0" />
 
-      <div className="absolute w-80 h-80 rounded-full bg-white/10 blur-xl -right-20 -top-20"/>
-
-      <div className="absolute w-72 h-72 rounded-full bg-white/10 blur-xl -left-20 -bottom-20"/>
-
-      <div className="relative z-10 max-w-5xl mx-auto">
-
-        <p className="uppercase tracking-[0.25em] text-sm opacity-80 mb-4">
+      <div className="relative z-10 max-w-6xl mx-auto text-center">
+        <p className="uppercase tracking-[0.3em] text-xs opacity-80 mb-5">
           Explore verified rooms
         </p>
 
-        <h1
-          className="text-5xl max-md:text-3xl font-normal mb-5"
-          style={{
-            fontFamily:"Georgia,serif"
-          }}
-        >
-          Find your next room with ease
+        <h1 className="text-5xl max-md:text-3xl font-bold leading-tight mb-6">
+          Find a room that feels like home
         </h1>
 
-        <p className="max-w-2xl mx-auto text-base leading-8 opacity-90">
-          Discover local rooms, view trusted listings,
-          and connect directly with owners —
-          all in one place.
+        <p className="max-w-3xl mx-auto text-lg leading-8 opacity-90">
+          Browse affordable rooms and flats, compare locations, and connect
+          directly with owners through Basobas.
         </p>
 
-        <div className="grid md:grid-cols-3 gap-4 mt-9">
-
-          {heroHighlights.map(item=>(
+        {/* Highlights */}
+        <div className="grid md:grid-cols-3 gap-5 mt-10">
+          {heroHighlights.map(item => (
             <div
               key={item.label}
-              className="bg-white/15 rounded-2xl p-5 text-left backdrop-blur-md"
+              className="bg-white/15 backdrop-blur-md rounded-2xl p-6 text-left border border-white/20 hover:bg-white/20 transition"
             >
-
-              <p className="text-xs uppercase tracking-widest opacity-80 mb-2">
+              <p className="text-xs uppercase tracking-widest opacity-75 mb-2">
                 {item.label}
               </p>
-
-              <strong>
-                {item.value}
-              </strong>
-
+              <h3 className="text-xl font-semibold">{item.value}</h3>
             </div>
           ))}
-
         </div>
 
-        <div className="flex justify-center gap-4 mt-8 flex-wrap">
-
+        {/* Actions */}
+        <div className="flex justify-center gap-4 mt-10 flex-wrap">
           <Link
             href="#listings"
-            className="bg-white text-sky-700 px-7 py-3 rounded-full font-bold"
+            className="bg-white text-sky-700 px-8 py-3 rounded-full font-semibold hover:scale-105 transition"
           >
             Browse Rooms
           </Link>
 
           <Link
             href="/auth/signup"
-            className="bg-white/20 border border-white/30 px-7 py-3 rounded-full font-bold"
+            className="px-8 py-3 rounded-full font-semibold border border-white/40 bg-white/10 hover:bg-white/20 transition"
           >
-            Start Free
+            Become a Host
           </Link>
-
         </div>
-
       </div>
-
     </section>
   );
 }

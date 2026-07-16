@@ -1,11 +1,20 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { v2 as cloudinary } from "cloudinary";
 
 // REGISTER
 export const registerUser = async (req, res) => {
   try {
-    const { name, phone, password, role } = req.body;
+    const {
+      name,
+      phone,
+      email,
+      bio,
+      address,
+      password,
+      role,
+    } = req.body;
 
     const userExists = await User.findOne({ phone });
 
@@ -21,6 +30,9 @@ export const registerUser = async (req, res) => {
     const user = await User.create({
       name,
       phone,
+      email,
+      bio,
+      address,
       password: hashedPassword,
       role,
     });
@@ -73,6 +85,7 @@ export const getUserProfile = async (req, res) => {
     });
   }
 };
+
 // UPDATE USER PROFILE
 export const updateUserProfile = async (req, res) => {
   try {
@@ -80,13 +93,20 @@ export const updateUserProfile = async (req, res) => {
     if (req.user.isSystemAdmin) {
       return res.status(403).json({
         success: false,
-        message:
-          "System admin profile cannot be updated.",
+        message: "System admin profile cannot be updated.",
       });
     }
 
     const userId = req.user.id;
-    const { name, phone, currentPassword, newPassword } = req.body;
+    const {
+      name,
+      phone,
+      email,
+      bio,
+      address,
+      currentPassword,
+      newPassword,
+    } = req.body;
 
     const user = await User.findById(userId);
 
@@ -95,6 +115,12 @@ export const updateUserProfile = async (req, res) => {
         success: false,
         message: "User not found",
       });
+    }
+
+    // Update profile image
+    if (req.file) {
+      user.profileImage = req.file.path;
+      user.profileImagePublicId = req.file.filename;
     }
 
     // Update password
@@ -144,6 +170,30 @@ export const updateUserProfile = async (req, res) => {
       user.phone = phone;
     }
 
+    // Update email
+    if (email !== undefined) {
+      const emailExists = await User.findOne({ email });
+
+      if (emailExists && emailExists._id.toString() !== userId.toString()) {
+        return res.status(400).json({
+          success: false,
+          message: "Email already in use",
+        });
+      }
+
+      user.email = email;
+    }
+
+    // Update bio
+    if (bio !== undefined) {
+      user.bio = bio;
+    }
+
+    // Update address
+    if (address !== undefined) {
+      user.address = address;
+    }
+
     await user.save();
 
     res.status(200).json({
@@ -153,6 +203,10 @@ export const updateUserProfile = async (req, res) => {
         id: user._id,
         name: user.name,
         phone: user.phone,
+        email: user.email,
+        bio: user.bio,
+        address: user.address,
+        profileImage: user.profileImage,
         role: user.role,
       },
     });
@@ -164,7 +218,43 @@ export const updateUserProfile = async (req, res) => {
   }
 };
 
-//logout user
+// DELETE PROFILE IMAGE
+export const deleteProfileImage = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Delete image from Cloudinary
+    if (user.profileImagePublicId) {
+      await cloudinary.uploader.destroy(user.profileImagePublicId);
+    }
+
+    // Clear image fields
+    user.profileImage = "";
+    user.profileImagePublicId = "";
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile image deleted successfully",
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// LOGOUT USER
 export const logoutUser = async (req, res) => {
   try {
     // Clear the httpOnly cookie
@@ -186,7 +276,7 @@ export const logoutUser = async (req, res) => {
   }
 };
 
-//login user
+// LOGIN USER
 export const loginUser = async (req, res) => {
   try {
     const { phone, password } = req.body;
@@ -266,6 +356,8 @@ export const loginUser = async (req, res) => {
       token,
       user: {
         id: user._id,
+        email: user.email,
+        address: user.address,
         name: user.name,
         phone: user.phone,
         role: user.role,

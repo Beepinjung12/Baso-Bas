@@ -35,11 +35,11 @@ export default function AdminRoomsPage() {
     fetchRooms();
   }, [fetchRooms]);
 
-  const handleCreate = async (data) => {
+  const handleCreate = async (data, imageFiles = []) => {
     setSaving(true);
     setMessage({ type: "", text: "" });
     try {
-      await createRoom(data);
+      await createRoom(data, imageFiles);
       setMessage({ type: "success", text: "Room added successfully." });
       setShowForm(false);
       await fetchRooms();
@@ -53,11 +53,11 @@ export default function AdminRoomsPage() {
     }
   };
 
-  const handleUpdate = async (data) => {
+  const handleUpdate = async (data, imageFiles = [], keepImages = []) => {
     setSaving(true);
     setMessage({ type: "", text: "" });
     try {
-      await updateRoom(editingRoom._id, data);
+      await updateRoom(editingRoom._id, data, imageFiles, keepImages);
       setMessage({ type: "success", text: "Room updated successfully." });
       setEditingRoom(null);
       await fetchRooms();
