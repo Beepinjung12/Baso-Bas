@@ -3,12 +3,14 @@ import protectRoute from "../middlewares/protectRoute.js";
 import { uploadRoomImages } from "../middlewares/upload.js";
 
 import {
+   toggleFeatured,
   postRoom,
   getRooms,
   getRoomById,
   searchRooms,
   updateRoom,
   deleteRoom,
+  getFeaturedRooms,
   getMyRooms,
 } from "../controllers/room.controller.js";
 
@@ -30,6 +32,8 @@ function handleUpload(req, res, next) {
 // Get all rooms
 router.get("/", getRooms);
 
+router.get("/featured", getFeaturedRooms);
+
 // Search rooms
 router.get("/search", searchRooms);
 
@@ -47,5 +51,11 @@ router.put("/:id", protectRoute, handleUpload, updateRoom);
 
 // Delete room
 router.delete("/:id", protectRoute, deleteRoom);
+
+router.put(
+  "/:id/featured",
+  protectRoute,
+  toggleFeatured
+);
 
 export default router;

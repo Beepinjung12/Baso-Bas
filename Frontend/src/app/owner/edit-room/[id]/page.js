@@ -10,6 +10,8 @@ import { updateRoom } from "@/app/api/rooms";
 
 export default function EditRoomPage() {
   const { id } = useParams();
+  console.log("PARAM ID:", id);
+  console.log("CURRENT ROOM ID:", id);
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
@@ -32,7 +34,7 @@ export default function EditRoomPage() {
     async function fetchRoom() {
       try {
         const res = await axios.get(
-          `${config.apiUrl}/api/rooms/${id}`,
+          `${config.apiUrl}/api/rooms/${params.id}`,
           {
             withCredentials: true
           }
@@ -63,9 +65,9 @@ export default function EditRoomPage() {
       }
     }
 
-    if (id) {
-      fetchRoom();
-    }
+if (params?.id) {
+  fetchRoom();
+}
   }, [id]);
 
   const handleChange = (e) => {
@@ -75,31 +77,41 @@ export default function EditRoomPage() {
     });
   };
 
-  const handleUpdate = async (e) => {
-    e.preventDefault();
+const handleUpdate = async (e) => {
+  e.preventDefault();
 
-    try {
-      await updateRoom(
-        id,
-        {
-          ...form,
-          rent: Number(form.rent),
-          numberOfRooms: Number(form.numberOfRooms)
-        },
-        imageFiles,
-        existingImages
-      );
+  const roomId = params?.id;
 
-      alert("Room updated successfully!");
-      router.push("/owner/list-rooms");
-    } catch (error) {
-      console.log(error);
-      alert(
-        error?.response?.data?.message ||
-        "Update failed"
-      );
-    }
-  };
+  console.log("BEFORE UPDATE CALL:", roomId);
+
+  if (!roomId) {
+    alert("Room ID missing");
+    return;
+  }
+
+  try {
+    await updateRoom(
+      roomId,
+      {
+        ...form,
+        rent: Number(form.rent),
+        numberOfRooms: Number(form.numberOfRooms),
+      },
+      imageFiles,
+      existingImages
+    );
+
+    alert("Room updated successfully!");
+    router.push("/owner/list-rooms");
+
+  } catch (error) {
+    console.log(error);
+    alert(
+      error?.response?.data?.message ||
+      "Update failed"
+    );
+  }
+};
 
   if (loading) {
     return (

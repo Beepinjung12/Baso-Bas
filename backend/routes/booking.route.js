@@ -2,6 +2,7 @@ import express from "express";
 
 import {
   createBooking,
+  validateBookingRequest,
   getMyBookings,
   getOwnerBookings,
   acceptBooking,
@@ -15,6 +16,9 @@ import protectRoute from "../middlewares/protectRoute.js";
 import adminOnly from "../middlewares/adminOnly.js";
 
 const router = express.Router();
+
+// Validate booking before payment
+router.post("/validate", protectRoute, validateBookingRequest);
 
 // Create booking
 router.post("/", protectRoute, createBooking);

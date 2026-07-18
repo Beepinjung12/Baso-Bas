@@ -90,6 +90,14 @@ const roomSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    available: {
+      type: Boolean,
+      default: true,
+    },
+    featured:{
+        type:Boolean,
+        default:false
+    }
   },
   {
     timestamps: true,

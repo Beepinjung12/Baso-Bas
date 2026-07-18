@@ -36,6 +36,9 @@ function buildRoomFormData(
 export async function getRooms() {
   return api.get("/api/rooms");
 }
+export async function getAdminRooms() {
+  return api.get("/api/admin/rooms");
+}
 
 export async function createRoom(data, imageFiles = []) {
   if (imageFiles.length > 0) {
@@ -53,11 +56,15 @@ export async function updateRoom(
   imageFiles = [],
   existingImages = []
 ) {
+
+  console.log("ROOMS.JS RECEIVED ID:", id);
+
   const formData = buildRoomFormData(
     data,
     imageFiles,
     existingImages
   );
+
 
   return api.put(
     `/api/rooms/${id}`,

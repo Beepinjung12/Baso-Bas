@@ -46,7 +46,7 @@ export default async function RoomDetails({ params }) {
 
   const result = await res.json();
   const room = result.data;
-
+  console.log(room);
   const allRoomsRes = await fetch(
   "http://localhost:5000/api/rooms",
   {
@@ -230,7 +230,11 @@ const similarRooms =
 
             <div className="mt-8 space-y-4">
 
-            <BookingButton roomId={room._id}/>
+            <BookingButton
+              roomId={room._id}
+              available={room.available}
+              rent={room.rent}
+            />
 
 
             <a

@@ -104,8 +104,8 @@ export default function OwnerBookingsPage() {
               <div className="flex gap-5">
                 <img
                   src={
-                    booking.room?.image
-                      ? `${config.apiUrl}${booking.room.image}`
+                    booking.room?.images?.length > 0
+                      ? booking.room.images[0].url
                       : "/default-room.jpg"
                   }
                   className="h-28 w-28 rounded-2xl object-cover"

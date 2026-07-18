@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-
 import config from "@/app/config";
 
-export default function BookingButton({ roomId }) {
+export default function BookingButton({
+  roomId,
+  available,
+  rent,
+}) {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -23,10 +26,27 @@ async function handleBooking(paymentMethod){
 
 if (paymentMethod === "ESEWA") {
 
+  // Step 1: Validate booking before payment
+  const validationRes = await axios.post(
+    `${config.apiUrl}/api/bookings/validate`,
+    {
+      roomId,
+    },
+    {
+      withCredentials: true,
+    }
+  );
+
+  if (!validationRes.data.success) {
+    setMessage(validationRes.data.message);
+    return;
+  }
+
+  // Step 2: Start eSewa payment
   const paymentRes = await axios.post(
     `${config.apiUrl}/api/payment/esewa`,
     {
-      amount: 0, // You can set the actual amount here if needed
+      amount: rent, // Replace with the actual room rent if needed
       roomId,
     },
     {
@@ -35,36 +55,22 @@ if (paymentMethod === "ESEWA") {
   );
 
   const form = document.createElement("form");
-
   form.method = "POST";
   form.action = paymentRes.data.paymentUrl;
 
   Object.entries(paymentRes.data.data).forEach(([key, value]) => {
     const input = document.createElement("input");
-
     input.type = "hidden";
     input.name = key;
     input.value = value;
-
     form.appendChild(input);
   });
 
-document.body.appendChild(form);
-
-console.log("Payment Response:");
-console.log(paymentRes.data);
-
-console.log("Form Data:");
-console.log(paymentRes.data.data);
-
-
-form.submit();
+  document.body.appendChild(form);
+  form.submit();
 
   return;
 }
-
-
-
     if(paymentMethod==="COD"){
 
       const res = await axios.post(
@@ -98,11 +104,14 @@ form.submit();
 
 
   }
-  catch(error){
+catch (error) {
+  console.log(error);
 
-    console.log(error);
-
-  }
+  setMessage(
+    error.response?.data?.message ||
+    "Something went wrong."
+  );
+}
   finally{
 
     setLoading(false);
@@ -112,30 +121,50 @@ form.submit();
 }
   return (
     <div>
-      <button
-        onClick={() => setShowPayment(true)}
-        disabled={loading}
-        className="
-          flex w-full
-          justify-center
-          items-center
-          gap-3
-          rounded-xl
-          bg-sky-600
-          py-3
-          font-semibold
-          text-white
-          transition
-          hover:bg-sky-700
-          disabled:cursor-not-allowed
-          disabled:opacity-60
-        "
-      >
-        {loading
-          ? "Sending Request..."
-          : "🏠 Book This Room"
-        }
-      </button>
+        {available ? (
+          <button
+            onClick={() => setShowPayment(true)}
+            disabled={loading}
+            className="
+              flex w-full
+              justify-center
+              items-center
+              gap-3
+              rounded-xl
+              bg-sky-600
+              py-3
+              font-semibold
+              text-white
+              transition
+              hover:bg-sky-700
+              disabled:cursor-not-allowed
+              disabled:opacity-60
+            "
+          >
+            {loading
+              ? "Sending Request..."
+              : "🏠 Book This Room"}
+          </button>
+        ) : (
+          <button
+            disabled
+            className="
+              flex w-full
+              justify-center
+              items-center
+              gap-3
+              rounded-xl
+              bg-red-500
+              py-3
+              font-semibold
+              text-white
+              cursor-not-allowed
+              opacity-80
+            "
+          >
+            ❌ Out of Stock
+          </button>
+        )}
 
       {showPayment && (
         <div className="mt-4 rounded-xl bg-white p-5 shadow">

@@ -76,6 +76,7 @@ const bookingSchema = new mongoose.Schema(
       default: ""
     }
   },
+  
   {
     timestamps: true
   }

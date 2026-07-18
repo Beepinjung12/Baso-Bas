@@ -1,6 +1,94 @@
 import Booking from "../models/booking.model.js";
 import Room from "../models/room.model.js";
 
+
+const validateBooking = async (userId, roomId) => {
+
+  if (!roomId) {
+    return {
+      success:false,
+      status:400,
+      message:"Room ID missing"
+    };
+  }
+
+  const room = await Room.findById(roomId);
+
+  if (!room) {
+    return {
+      success: false,
+      status: 404,
+      message: "Room not found",
+    };
+  }
+
+  // Prevent owner booking own room
+  if (room.owner.toString() === userId) {
+    return {
+      success: false,
+      status: 400,
+      message: "You cannot book your own room.",
+    };
+  }
+
+  // Check existing booking
+    const existingBooking = await Booking.findOne({
+      user: userId,
+      room: roomId,
+      bookingStatus: {
+        $in: [
+          "PAYMENT_PENDING",
+          "PENDING",
+          "ACCEPTED",
+        ],
+      },
+    });
+
+  if (existingBooking) {
+    return {
+      success: false,
+      status: 400,
+      message: "You already have a booking request for this room.",
+    };
+  }
+
+  return {
+    success: true,
+    room,
+  };
+};
+
+
+export const validateBookingRequest = async (req, res) => {
+  try {
+    const { roomId } = req.body;
+
+    const validation = await validateBooking(
+      req.user.id,
+      roomId
+    );
+
+    if (!validation.success) {
+      return res.status(validation.status).json({
+        success: false,
+        message: validation.message,
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Booking validation passed.",
+    });
+
+  } catch (error) {
+    console.log("VALIDATE BOOKING ERROR", error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 // =====================
 // Create Booking
 // =====================
@@ -13,43 +101,21 @@ export const createBooking = async (req, res) => {
       bookingStatus
     } = req.body;
 
-    const paymentMethod = payment?.method || "COD";
+      const paymentMethod = payment?.method || "COD";
 
-    const room = await Room.findById(roomId);
+      const validation = await validateBooking(
+        req.user.id,
+        roomId
+      );
 
-    if (!room) {
-      return res.status(404).json({
-        success: false,
-        message: "Room not found"
-      });
-    }
-
-    // Prevent owner booking own room
-    if (room.owner.toString() === req.user.id) {
-      return res.status(400).json({
-        success: false,
-        message: "You cannot book your own room."
-      });
-    }
-
-    // Check existing booking
-    const existingBooking = await Booking.findOne({
-      user: req.user.id,
-      room: roomId,
-      bookingStatus: {
-        $in: [
-          "PAYMENT_PENDING",
-          "PENDING"
-        ]
+      if (!validation.success) {
+        return res.status(validation.status).json({
+          success: false,
+          message: validation.message,
+        });
       }
-    });
 
-    if (existingBooking) {
-      return res.status(400).json({
-        success: false,
-        message: "You already have a booking request for this room."
-      });
-    }
+      const room = validation.room;
 
     // Create booking
     const booking = await Booking.create({
@@ -175,7 +241,6 @@ export const updateBookingStatus = async (req, res) => {
 export const acceptBooking = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id);
-
     if (!booking) {
       return res.status(404).json({
         success: false,
@@ -215,6 +280,7 @@ export const acceptBooking = async (req, res) => {
       message: "Booking accepted",
       data: booking,
     });
+
   } catch (error) {
     console.log("ACCEPT BOOKING ERROR:", error);
 

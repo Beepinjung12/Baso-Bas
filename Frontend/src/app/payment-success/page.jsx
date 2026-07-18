@@ -15,62 +15,70 @@ export default function PaymentSuccessPage() {
   useEffect(() => {
     async function verifyPayment() {
       try {
-        const data = searchParams.get("data");
-        const roomId = searchParams.get("roomId");
+        console.log("FULL URL:", window.location.href);
+        console.log("PATHNAME:", window.location.pathname);
+        console.log("SEARCH:", window.location.search);
+        console.log("PARAMS:", searchParams.toString());
 
-        console.log(searchParams.toString());
-        console.log("roomId:", roomId);
+        const data = searchParams.get("data");
+
         console.log("data:", data);
 
-        if (!data || !roomId) {
+        if (!data) {
           router.push("/explore");
           return;
         }
 
+        // Verify payment with backend
         const res = await axios.post(
           `${config.apiUrl}/api/payment/esewa/verify`,
           {
             data,
-            roomId
           },
           {
-            withCredentials: true
+            withCredentials: true,
           }
         );
 
-        if (res.data.success) {
-
-          const {
-            roomId,
-            transactionId,
-            amount,
-          } = res.data.data;
-
-          const bookingRes = await axios.post(
-            `${config.apiUrl}/api/bookings`,
-            {
-              roomId,
-              message: "I am interested in renting this room.",
-              bookingStatus: "PENDING",
-              payment: {
-                method: "ESEWA",
-                amount,
-                status: "PAID",
-                transactionId,
-              },
-            },
-            {
-              withCredentials: true,
-            }
-          );
-
-          console.log("BOOKING CREATED", bookingRes.data);
-
-          router.push(`/rooms/${roomId}?booking=success`);
+        if (!res.data.success) {
+          router.push("/explore");
+          return;
         }
+
+        const {
+          roomId,
+          transactionId,
+          amount,
+        } = res.data.data;
+
+        console.log("VERIFY RESPONSE:", res.data);
+
+        // Create booking after successful payment verification
+        const bookingRes = await axios.post(
+          `${config.apiUrl}/api/bookings`,
+          {
+            roomId,
+            message: "I am interested in renting this room.",
+            bookingStatus: "PENDING",
+            payment: {
+              method: "ESEWA",
+              amount,
+              status: "PAID",
+              transactionId,
+            },
+          },
+          {
+            withCredentials: true,
+          }
+        );
+
+        console.log("BOOKING CREATED:", bookingRes.data);
+
+        router.push(`/rooms/${roomId}?booking=success`);
       } catch (error) {
-        console.log(error.response?.data);
+        console.log("PAYMENT SUCCESS PAGE ERROR");
         console.log(error.response?.status);
+        console.log(error.response?.data);
         console.log(error);
 
         router.push("/explore");
@@ -80,30 +88,29 @@ export default function PaymentSuccessPage() {
     }
 
     verifyPayment();
-  }, []);
+  }, [router, searchParams]);
 
   return (
-    <div className="
-      min-h-screen
-      flex
-      items-center
-      justify-center
-    ">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
         {loading ? (
-          <h1 className="text-xl">
-            Verifying payment...
-          </h1>
+          <>
+            <h1 className="text-2xl font-semibold">
+              Verifying Payment...
+            </h1>
+            <p className="mt-2 text-gray-500">
+              Please wait while we verify your payment.
+            </p>
+          </>
         ) : (
-          <h1 className="
-            text-3xl
-            font-bold
-            text-green-600
-          ">
-            Payment Successful ✅
-            <br />
-            Redirecting...
-          </h1>
+          <>
+            <h1 className="text-3xl font-bold text-green-600">
+              Payment Successful ✅
+            </h1>
+            <p className="mt-2 text-gray-500">
+              Redirecting...
+            </p>
+          </>
         )}
       </div>
     </div>

@@ -1,7 +1,13 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import React from "react";
 import Image from "next/image";
 import budgetRoom from "../../assets/budget.jpg";
 import cozyRoom from "../../assets/cozy.avif";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import config from "@/app/config";
 import modernRoom from "../../assets/Modern.avif";
 import sharedRoom from "../../assets/shared.avif";
 
@@ -31,7 +37,30 @@ const steps = [
   { n: "4", title: "Move in",        desc: "Enjoy your new room with peace of mind" },
 ];
 
-const Featured = () => {
+    const Featured = () => {
+      const router = useRouter();
+      const [featuredRooms, setFeaturedRooms] = useState([]);
+      useEffect(() => {
+      const loadFeaturedRooms = async () => {
+        try {
+          const res = await axios.get(
+            `${config.apiUrl}/api/rooms/featured`
+          );
+          console.log("FEATURED ROOMS:", res.data.data);
+          setFeaturedRooms(res.data.data);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+
+      loadFeaturedRooms();
+    }, []);
+
+    const displayRooms = [
+  ...featuredRooms,
+  ...rooms.slice(Math.max(0, 4 - featuredRooms.length)),
+];
+console.log("DISPLAY ROOMS:", displayRooms);
   return (
     <div>
       {/* ===== FEATURED LISTINGS ===== */}
@@ -66,22 +95,29 @@ const Featured = () => {
 
         {/* Room grid */}
         <div className="grid grid-cols-4 gap-4 max-lg:grid-cols-2 max-md:grid-cols-1">
-          {rooms.map((room) => (
+          {displayRooms.map((room, index) => (
             <div
-              key={room.title}
-              className="overflow-hidden rounded-2xl border border-sky-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
-            >
+                key={room._id || index}
+                onClick={() => {
+                  if (room._id) {
+                    router.push(`/rooms/${room._id}`);
+                  }
+                }}
+                className={`overflow-hidden rounded-2xl border border-sky-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl ${
+                  room._id ? "cursor-pointer" : ""
+                }`}
+              >
               {/* Image */}
               <div className="relative h-[220px] overflow-hidden">
                 <Image
-                  src={room.image}
+                  src={room.image || modernRoom}
                   alt={room.title}
                   className="object-cover"
                   fill
                   sizes="(max-width: 768px) 100vw, 25vw"
                 />
                 <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-sky-700">
-                  {room.badge}
+                  {room.featured ? "Featured" : room.badge}
                 </span>
                 <button className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-500 hover:text-red-400 transition">
                   <RiHeartLine size={16} />
@@ -97,7 +133,7 @@ const Featured = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="text-[16px] font-medium text-sky-600">
-                    {room.price}
+                    {room.rent ? `$${room.rent}` : room.price}
                     <span className="text-[11px] font-light text-slate-500"> /mo</span>
                   </div>
                   <div className="flex items-center gap-1 text-[12px] text-slate-500">

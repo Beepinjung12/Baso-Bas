@@ -1,24 +1,72 @@
 import express from "express";
+
 import protectRoute from "../middlewares/protectRoute.js";
 import adminOnly from "../middlewares/adminOnly.js";
+
 import { adminLogin } from "../controllers/adminAuth.controller.js";
+
 import {
   getAdminStats,
   getAllUsers,
   deleteUser,
+  getAdminRooms,
+  toggleFeaturedRoom,
 } from "../controllers/admin.controller.js";
+
 
 const router = express.Router();
 
-// Admin login (public)
+
+// =======================
+// Admin Login (Public)
+// =======================
 router.post("/login", adminLogin);
 
-// All routes below require authentication and admin role
+
+
+// =======================
+// Protected Admin Routes
+// =======================
 router.use(protectRoute, adminOnly);
 
-// Admin dashboard routes
+
+
+// =======================
+// Dashboard
+// =======================
 router.get("/stats", getAdminStats);
+
+
+
+// =======================
+// User Management
+// =======================
 router.get("/users", getAllUsers);
-router.delete("/users/:id", deleteUser);
+
+router.delete(
+  "/users/:id",
+  deleteUser
+);
+
+
+
+// =======================
+// Room Management
+// =======================
+
+// Get all rooms with owner details
+router.get(
+  "/rooms",
+  getAdminRooms
+);
+
+
+// Add / Remove featured room
+router.put(
+  "/rooms/:id/featured",
+  toggleFeaturedRoom
+);
+
+
 
 export default router;

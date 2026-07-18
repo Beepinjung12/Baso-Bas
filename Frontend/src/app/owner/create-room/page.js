@@ -1,18 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-import axios from "axios";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-import config from "@/app/config";
 import RoomImageUpload from "@/app/components/RoomImageUpload";
-import { updateRoom } from "@/app/api/rooms";
+import { createRoom } from "@/app/api/rooms";
 
-export default function EditRoomPage() {
-  const { id } = useParams();
+export default function CreateRoomPage() {
   const router = useRouter();
-
-  const [loading, setLoading] = useState(true);
 
   const [form, setForm] = useState({
     title: "",
@@ -28,90 +23,44 @@ export default function EditRoomPage() {
   const [imageFiles, setImageFiles] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
 
-  useEffect(() => {
-    async function fetchRoom() {
-      try {
-        const res = await axios.get(
-          `${config.apiUrl}/api/rooms`,
-          {
-            withCredentials: true
-          }
-        );
-
-        const room = res.data.data.find(
-          item => item._id === id
-        );
-
-        if (room) {
-          setForm({
-            title: room.title || "",
-            location: room.location || "",
-            rent: room.rent || "",
-            contact: room.contact || "",
-            whatsapp: room.whatsapp || "",
-            roomSize: room.roomSize || "",
-            numberOfRooms: room.numberOfRooms || "",
-            description: room.description || "",
-          });
-
-          setExistingImages(room.images || []);
-        }
-      } catch (error) {
-        console.log("FETCH ROOM ERROR", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchRoom();
-  }, [id]);
-
   const handleChange = (e) => {
     setForm({
       ...form,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
-  const handleUpdate = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    console.log("CREATE ROOM SUBMIT");
+    console.log("FORM DATA:", form);
+
     try {
-      await updateRoom(
-        id,
+      await createRoom(
         {
           ...form,
           rent: Number(form.rent),
-          numberOfRooms: Number(form.numberOfRooms)
+          numberOfRooms: Number(form.numberOfRooms),
         },
-        imageFiles,
-        existingImages
+        imageFiles
       );
 
-      alert("Room updated successfully!");
+      alert("Room created successfully!");
       router.push("/owner/list-rooms");
     } catch (error) {
-      console.log(error);
+      console.log("CREATE ROOM ERROR:", error);
+
       alert(
         error?.response?.data?.message ||
-        "Update failed"
+        "Room creation failed"
       );
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading room...
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-100">
       <section className="
-        relative
-        overflow-hidden
         bg-gradient-to-br
         from-sky-600
         via-sky-400
@@ -120,23 +69,33 @@ export default function EditRoomPage() {
         py-14
       ">
         <h1 className="text-5xl font-semibold text-white">
-          Edit your
+          Create your
           <br />
           room listing
         </h1>
 
-        <p className="mt-4 text-white/80 text-lg">
-          Update your room details
+        <p className="mt-4 text-white/80">
+          Add your room details
         </p>
       </section>
 
-      <div className="relative z-20 -mt-10 px-10 pb-10">
-        <div className="mx-auto max-w-5xl rounded-3xl bg-white p-8 shadow-xl">
+      <div className="px-10 pb-10 -mt-10">
+        <div className="
+          mx-auto
+          max-w-5xl
+          rounded-3xl
+          bg-white
+          p-8
+          shadow-xl
+        ">
           <h2 className="text-3xl font-semibold">
             Room Information
           </h2>
 
-          <form onSubmit={handleUpdate} className="mt-8 space-y-6">
+          <form
+            onSubmit={handleSubmit}
+            className="mt-8 space-y-6"
+          >
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label>Room Title</label>
@@ -233,22 +192,19 @@ export default function EditRoomPage() {
               onExistingImagesChange={setExistingImages}
             />
 
-            <div className="flex gap-4 pt-4">
-              <button
-                type="submit"
-                className="rounded-xl bg-sky-600 px-8 py-3 font-semibold text-white"
-              >
-                💾 Save Changes
-              </button>
-
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="rounded-xl border px-8 py-3"
-              >
-                Cancel
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="
+                rounded-xl
+                bg-sky-600
+                px-8
+                py-3
+                font-semibold
+                text-white
+              "
+            >
+              Create Room
+            </button>
           </form>
         </div>
       </div>
