@@ -19,7 +19,6 @@ const wishlistSchema = new mongoose.Schema(
   }
 );
 
-
 // Prevent duplicate wishlist
 wishlistSchema.index(
   {
@@ -30,7 +29,6 @@ wishlistSchema.index(
     unique: true,
   }
 );
-
 
 const Wishlist = mongoose.model(
   "Wishlist",

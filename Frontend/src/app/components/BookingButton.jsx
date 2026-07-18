@@ -16,155 +16,135 @@ export default function BookingButton({
   const [message, setMessage] = useState("");
   const [showPayment, setShowPayment] = useState(false);
 
+  async function handleBooking(paymentMethod) {
+    try {
+      setLoading(true);
 
-async function handleBooking(paymentMethod){
-
-  try{
-
-    setLoading(true);
-
-
-if (paymentMethod === "ESEWA") {
-
-  // Step 1: Validate booking before payment
-  const validationRes = await axios.post(
-    `${config.apiUrl}/api/bookings/validate`,
-    {
-      roomId,
-    },
-    {
-      withCredentials: true,
-    }
-  );
-
-  if (!validationRes.data.success) {
-    setMessage(validationRes.data.message);
-    return;
-  }
-
-  // Step 2: Start eSewa payment
-  const paymentRes = await axios.post(
-    `${config.apiUrl}/api/payment/esewa`,
-    {
-      amount: rent, // Replace with the actual room rent if needed
-      roomId,
-    },
-    {
-      withCredentials: true,
-    }
-  );
-
-  const form = document.createElement("form");
-  form.method = "POST";
-  form.action = paymentRes.data.paymentUrl;
-
-  Object.entries(paymentRes.data.data).forEach(([key, value]) => {
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = key;
-    input.value = value;
-    form.appendChild(input);
-  });
-
-  document.body.appendChild(form);
-  form.submit();
-
-  return;
-}
-    if(paymentMethod==="COD"){
-
-      const res = await axios.post(
-        `${config.apiUrl}/api/bookings`,
-        {
-          roomId,
-
-          message:
-          "I am interested in renting this room.",
-
-          payment:{
-            method:"COD",
-            amount:0
+      if (paymentMethod === "ESEWA") {
+        // Step 1: Validate booking before payment
+        const validationRes = await axios.post(
+          `${config.apiUrl}/api/bookings/validate`,
+          {
+            roomId,
+          },
+          {
+            withCredentials: true,
           }
-        },
-        {
-          withCredentials:true
-        }
-      );
-
-
-      if(res.data.success){
-
-        setMessage(
-          "Booking request sent successfully ✅"
         );
 
+        if (!validationRes.data.success) {
+          setMessage(validationRes.data.message);
+          return;
+        }
+
+        // Step 2: Start eSewa payment
+        const paymentRes = await axios.post(
+          `${config.apiUrl}/api/payment/esewa`,
+          {
+            amount: rent,
+            roomId,
+          },
+          {
+            withCredentials: true,
+          }
+        );
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = paymentRes.data.paymentUrl;
+
+        Object.entries(paymentRes.data.data).forEach(([key, value]) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          input.value = value;
+          form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+
+        return;
       }
 
+      if (paymentMethod === "COD") {
+        const res = await axios.post(
+          `${config.apiUrl}/api/bookings`,
+          {
+            roomId,
+            message: "I am interested in renting this room.",
+            payment: {
+              method: "COD",
+              amount: 0
+            }
+          },
+          {
+            withCredentials: true
+          }
+        );
+
+        if (res.data.success) {
+          setMessage("Booking request sent successfully ✅");
+        }
+      }
+    } catch (error) {
+      console.log(error);
+
+      setMessage(
+        error.response?.data?.message ||
+        "Something went wrong."
+      );
+    } finally {
+      setLoading(false);
     }
-
-
-  }
-catch (error) {
-  console.log(error);
-
-  setMessage(
-    error.response?.data?.message ||
-    "Something went wrong."
-  );
-}
-  finally{
-
-    setLoading(false);
-
   }
 
-}
   return (
     <div>
-        {available ? (
-          <button
-            onClick={() => setShowPayment(true)}
-            disabled={loading}
-            className="
-              flex w-full
-              justify-center
-              items-center
-              gap-3
-              rounded-xl
-              bg-sky-600
-              py-3
-              font-semibold
-              text-white
-              transition
-              hover:bg-sky-700
-              disabled:cursor-not-allowed
-              disabled:opacity-60
-            "
-          >
-            {loading
-              ? "Sending Request..."
-              : "🏠 Book This Room"}
-          </button>
-        ) : (
-          <button
-            disabled
-            className="
-              flex w-full
-              justify-center
-              items-center
-              gap-3
-              rounded-xl
-              bg-red-500
-              py-3
-              font-semibold
-              text-white
-              cursor-not-allowed
-              opacity-80
-            "
-          >
-            ❌ Out of Stock
-          </button>
-        )}
+      {available ? (
+        <button
+          onClick={() => setShowPayment(true)}
+          disabled={loading}
+          className="
+            flex w-full
+            justify-center
+            items-center
+            gap-3
+            rounded-xl
+            bg-sky-600
+            py-3
+            font-semibold
+            text-white
+            transition
+            hover:bg-sky-700
+            disabled:cursor-not-allowed
+            disabled:opacity-60
+          "
+        >
+          {loading
+            ? "Sending Request..."
+            : "🏠 Book This Room"}
+        </button>
+      ) : (
+        <button
+          disabled
+          className="
+            flex w-full
+            justify-center
+            items-center
+            gap-3
+            rounded-xl
+            bg-red-500
+            py-3
+            font-semibold
+            text-white
+            cursor-not-allowed
+            opacity-80
+          "
+        >
+          ❌ Out of Stock
+        </button>
+      )}
 
       {showPayment && (
         <div className="mt-4 rounded-xl bg-white p-5 shadow">
