@@ -29,20 +29,34 @@ const Header = () => {
   return (
     <>
       <nav className="sticky top-0 z-50 relative flex h-16 items-center justify-between border-b border-sky-100 bg-white/90 px-4 sm:px-6 lg:px-8 backdrop-blur-md">
-
         <Logo />
 
         {/* NAV LINKS */}
         <ul className="hidden lg:flex list-none gap-8">
-          <li><Link href="/explore" className="text-[14px] text-slate-500">Explore</Link></li>
-          <li><Link href="/list-room" className="text-[14px] text-slate-500">List Room</Link></li>
-          <li><Link href="/services" className="text-[14px] text-slate-500">Services</Link></li>
-          <li><Link href="/about" className="text-[14px] text-slate-500">About</Link></li>
+          <li>
+            <Link href="/explore" className="text-[14px] text-slate-500">
+              Explore
+            </Link>
+          </li>
+          <li>
+            <Link href="/list-room" className="text-[14px] text-slate-500">
+              List Room
+            </Link>
+          </li>
+          <li>
+            <Link href="/services" className="text-[14px] text-slate-500">
+              Services
+            </Link>
+          </li>
+          <li>
+            <Link href="/about" className="text-[14px] text-slate-500">
+              About
+            </Link>
+          </li>
         </ul>
 
         {/* RIGHT SIDE */}
         <div className="hidden lg:flex items-center gap-3">
-
           {isLoggedIn ? (
             <>
               {/* 🔥 ADMIN BUTTON */}
@@ -56,13 +70,10 @@ const Header = () => {
               )}
 
               {/* WISHLIST */}
-              <Link
-                href="/wishlist"
-                className="transition hover:text-sky-600"
-              >
+              <Link href="/wishlist" className="transition hover:text-sky-600">
                 ❤️ <WishlistCount />
               </Link>
-              
+
               {/*  OWNER BUTTON  */}
               {user?.role === "owner" && (
                 <Link
@@ -91,31 +102,33 @@ const Header = () => {
             </>
           ) : (
             <>
-              <Link href="/auth/login" className="rounded-full border px-4 py-[7px] text-[13px]">
+              <Link
+                href="/auth/login"
+                className="rounded-full border px-4 py-[7px] text-[13px]"
+              >
                 Login
               </Link>
 
-              <Link href="/auth/signup" className="rounded-full bg-sky-500 px-5 py-[7px] text-[13px] text-white">
+              <Link
+                href="/auth/signup"
+                className="rounded-full bg-sky-500 px-5 py-[7px] text-[13px] text-white"
+              >
                 Sign Up
               </Link>
             </>
           )}
         </div>
         <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden text-sky-700"
-          >
-            {mobileMenuOpen ? (
-              <HiX size={28} />
-            ) : (
-              <HiMenuAlt3 size={28} />
-            )}
-          </button>
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="lg:hidden text-sky-700"
+        >
+          {mobileMenuOpen ? <HiX size={28} /> : <HiMenuAlt3 size={28} />}
+        </button>
       </nav>
 
-        {mobileMenuOpen && (
+      {mobileMenuOpen && (
         <div
-            className="
+          className="
               lg:hidden
               fixed
               top-20
@@ -132,110 +145,86 @@ const Header = () => {
               transition-all
               duration-300
             "
-          >
-        <div className="flex flex-col p-5 space-y-4">
-
-        <Link
-          href="/explore"
-          onClick={() => setMobileMenuOpen(false)}
-          className="block px-5 py-3 hover:bg-sky-50 transition"
         >
-          Explore
-        </Link>
-
-      <Link
-        href="/list-room"
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        List Room
-      </Link>
-
-      <Link
-        href="/services"
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        Services
-      </Link>
-
-      <Link
-        href="/about"
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        About
-      </Link>
-
-      {isLoggedIn ? (
-        <>
-          {user?.role === "admin" && (
+          <div className="flex flex-col p-5 space-y-4">
             <Link
-              href="/admin"
+              href="/explore"
               onClick={() => setMobileMenuOpen(false)}
+              className="block px-0 py-2 hover:bg-sky-50 transition"
             >
-              Admin
+              Explore
             </Link>
-          )}
 
-          {user?.role === "owner" && (
-            <Link
-              href="/owner"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Owner Dashboard
+            <Link href="/list-room" onClick={() => setMobileMenuOpen(false)}>
+              List Room
             </Link>
-          )}
 
-          <Link
-            href="/wishlist"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Wishlist ❤️ <WishlistCount />
-          </Link>
+            <Link href="/services" onClick={() => setMobileMenuOpen(false)}>
+              Services
+            </Link>
 
-          <Link
-            href="/profile"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Profile
-          </Link>
+            <Link href="/about" onClick={() => setMobileMenuOpen(false)}>
+              About
+            </Link>
 
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                handleLogout();
-              }}
-              className="
+            {isLoggedIn ? (
+              <>
+                {user?.role === "admin" && (
+                  <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
+                    Admin
+                  </Link>
+                )}
+
+                {user?.role === "owner" && (
+                  <Link href="/owner" onClick={() => setMobileMenuOpen(false)}>
+                    Owner Dashboard
+                  </Link>
+                )}
+
+                <Link href="/wishlist" onClick={() => setMobileMenuOpen(false)}>
+                  <WishlistCount />
+                </Link>
+
+                <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
+                  Profile
+                </Link>
+
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="
                 w-full
                 text-left
-                px-5
-                py-3
                 text-red-600
                 hover:bg-red-50
                 transition
               "
-            >
-              Logout
-            </button>
-        </>
-      ) : (
-        <>
-          <Link
-            href="/auth/login"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Login
-          </Link>
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Login
+                </Link>
 
-          <Link
-            href="/auth/signup"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Sign Up
-          </Link>
-        </>
+                <Link
+                  href="/auth/signup"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
       )}
-    </div>
-  </div>
-)}
     </>
   );
 };
