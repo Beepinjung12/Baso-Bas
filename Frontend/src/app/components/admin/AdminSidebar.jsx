@@ -19,6 +19,7 @@ import {
   ADMIN_ROUTE,
   ADMIN_ROOMS_ROUTE,
   ADMIN_USERS_ROUTE,
+  ADMIN_OWNER_REQUESTS_ROUTE,
 } from "../../constants/routes";
 
 const menu = [
@@ -36,6 +37,11 @@ const menu = [
     title: "Users",
     href: ADMIN_USERS_ROUTE,
     icon: "👥",
+  },
+  {
+    title: "Owner Requests",
+    href: ADMIN_OWNER_REQUESTS_ROUTE,
+    icon: "📨",
   },
   {
     title: "Bookings",

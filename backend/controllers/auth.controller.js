@@ -15,6 +15,23 @@ export const registerUser = async (req, res) => {
       password,
       role,
     } = req.body;
+    // Prevent registration using the reserved system admin phone
+    if (phone === process.env.SYSTEM_ADMIN_PHONE) {
+      return res.status(400).json({
+        success: false,
+        message: "This phone number is reserved and cannot be registered.",
+      });
+    }
+
+        // Only allow valid roles
+    const allowedRoles = ["user", "owner"];
+
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role selected.",
+      });
+    }
 
     const userExists = await User.findOne({ phone });
 
@@ -362,6 +379,190 @@ export const loginUser = async (req, res) => {
         phone: user.phone,
         role: user.role,
       },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const requestOwnerAccess = async (req, res) => {
+  try {
+    // System admin cannot send requests
+    if (req.user.isSystemAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "System admin cannot request owner access.",
+      });
+    }
+
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    // Already an owner
+    if (user.role === "owner") {
+      return res.status(400).json({
+        success: false,
+        message: "You are already an owner.",
+      });
+    }
+
+    // Already requested
+    if (user.ownerRequestStatus === "pending") {
+      return res.status(400).json({
+        success: false,
+        message: "Your owner request is already pending.",
+      });
+    }
+
+    user.ownerRequestStatus = "pending";
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Owner request submitted successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getOwnerRequests = async (req, res) => {
+  try {
+    // Only system admin can access
+    if (!req.user.isSystemAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied.",
+      });
+    }
+
+    const requests = await User.find({
+        ownerRequestStatus: {
+          $in: ["pending", "approved", "rejected"],
+        },
+      }).select("-password");
+
+    res.status(200).json({
+      success: true,
+      data: requests,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const approveOwnerRequest = async (req, res) => {
+  try {
+    // Only system admin
+    if (!req.user.isSystemAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied.",
+      });
+    }
+
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    user.role = "owner";
+    user.ownerRequestStatus = "approved";
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Owner request approved successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const rejectOwnerRequest = async (req, res) => {
+  try {
+    // Only system admin
+    if (!req.user.isSystemAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied.",
+      });
+    }
+
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    user.ownerRequestStatus = "rejected";
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Owner request rejected.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const demoteOwner = async (req, res) => {
+  try {
+    if (!req.user.isSystemAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied.",
+      });
+    }
+
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    user.role = "user";
+    user.ownerRequestStatus = "none";
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Owner has been demoted to user.",
     });
   } catch (error) {
     res.status(500).json({

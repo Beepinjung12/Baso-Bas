@@ -41,6 +41,12 @@ const userSchema = new mongoose.Schema(
         default: ""
     },
 
+    ownerRequestStatus: {
+        type: String,
+        enum: ["none", "pending", "approved", "rejected"],
+        default: "none",
+    },
+
     role: {
       type: String,
       enum: ["owner", "admin", "user"],

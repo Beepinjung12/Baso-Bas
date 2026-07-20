@@ -56,3 +56,46 @@ export async function deleteProfileImage() {
     }
   );
 }
+
+// Request owner access
+export async function requestOwnerAccess() {
+  return await axios.post(
+    `${config.apiUrl}/api/auth/request-owner`,
+    {},
+    { withCredentials: true }
+  );
+}
+
+// Get all pending owner requests (Admin)
+export async function getOwnerRequests() {
+  return await axios.get(
+    `${config.apiUrl}/api/auth/owner-requests`,
+    { withCredentials: true }
+  );
+}
+
+// Approve owner request (Admin)
+export async function approveOwnerRequest(userId) {
+  return await axios.put(
+    `${config.apiUrl}/api/auth/owner-requests/${userId}/approve`,
+    {},
+    { withCredentials: true }
+  );
+}
+
+// Reject owner request (Admin)
+export async function rejectOwnerRequest(userId) {
+  return await axios.put(
+    `${config.apiUrl}/api/auth/owner-requests/${userId}/reject`,
+    {},
+    { withCredentials: true }
+  );
+}
+
+export async function demoteOwner(userId) {
+  return await axios.put(
+    `${config.apiUrl}/api/auth/owner-requests/${userId}/demote`,
+    {},
+    { withCredentials: true }
+  );
+}
