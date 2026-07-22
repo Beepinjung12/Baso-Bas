@@ -18,26 +18,62 @@ const Footer = () => {
         </div>
 
         {/* Explore */}
-        <div className="flex flex-col gap-2 text-[13px]">
-          <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-white/50">Explore</h4>
-          {["Search rooms", "View listings", "Map view"].map((l) => (
-            <Link key={l} href="#" className="text-white/70 no-underline transition hover:text-sky-100">{l}</Link>
-          ))}
-        </div>
+<div className="flex flex-col gap-2 text-[13px]">
+  <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-white/50">Explore</h4>
+  {[
+    { label: "Search rooms", href: "/explore#search" },
+    { label: "View listings", href: "/explore#listings" },
+    {
+      label: "Map view",
+      href: "https://www.google.com/maps/place/Kathmandu",
+      external: true,
+    },
+  ].map(({ label, href, external }) => (
+    <Link
+      key={label}
+      href={href}
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener noreferrer" : undefined}
+      className="text-white/70 no-underline transition hover:text-sky-100"
+    >
+      {label}
+    </Link>
+  ))}
+</div>
 
         {/* Platform */}
-        <div className="flex flex-col gap-2 text-[13px]">
-          <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-white/50">Platform</h4>
-          {["List your room", "Admin dashboard", "Pricing"].map((l) => (
-            <Link key={l} href="#" className="text-white/70 no-underline transition hover:text-sky-100">{l}</Link>
-          ))}
-        </div>
+<div className="flex flex-col gap-2 text-[13px]">
+  <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-white/50">Platform</h4>
+  {[
+    { label: "List your room", href: "/list-room" },
+    { label: "Admin dashboard", href: "/owner" },
+    { label: "Pricing", href: "/page-pricing" },
+  ].map(({ label, href }) => (
+    <Link
+      key={label}
+      href={href}
+      className="text-white/70 no-underline transition hover:text-sky-100"
+    >
+      {label}
+    </Link>
+  ))}
+</div>
 
         {/* Company */}
         <div className="flex flex-col gap-2 text-[13px]">
           <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-white/50">Company</h4>
-          {["About", "Contact", "Privacy policy"].map((l) => (
-            <Link key={l} href="#" className="text-white/70 no-underline transition hover:text-sky-100">{l}</Link>
+          {[
+            { label: "About", href: "/about" },
+            { label: "Contact", href: "/contact" },
+            { label: "Privacy policy", href: "/privacypolicy" },
+          ].map(({ label, href }) => (
+            <Link
+              key={label}
+              href={href}
+              className="text-white/70 no-underline transition hover:text-sky-100"
+            >
+              {label}
+            </Link>
           ))}
         </div>
       </div>

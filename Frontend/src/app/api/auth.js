@@ -17,6 +17,14 @@ export async function signup(data) {
   );
 }
 
+export async function forgotPassword({ phone }) {
+  return await axios.post(
+    `${config.apiUrl}/api/auth/forgot-password`,
+    { phone },
+    { withCredentials: true }
+  );
+}
+
 export async function getUserProfile() {
   return await axios.get(
     `${config.apiUrl}/api/auth/profile`,
